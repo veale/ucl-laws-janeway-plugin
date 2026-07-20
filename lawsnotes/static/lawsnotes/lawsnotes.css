@@ -1,0 +1,1994 @@
+/* ============================================================
+   UCL Laws custom-property defaults
+   ============================================================
+   The plugin's head_css hook emits a `:root { --lawsnotes-*: ...; }`
+   block from per-journal Settings, so editors can override these
+   without touching CSS. The defaults below mirror the defaults in
+   plugin_settings.CUSTOMISATION_SETTINGS so the page still renders
+   correctly when the hook isn't running (e.g. a fresh install
+   before install_plugins, or while debugging in isolation). */
+:root {
+    --lawsnotes-color-page: #F2F2F2;
+    --lawsnotes-color-paper: #FFFFFF;
+    --lawsnotes-color-primary: #113B3A;
+    --lawsnotes-color-secondary: #002248;
+    --lawsnotes-color-text: #2a2a2a;
+    --lawsnotes-color-muted: #555;
+    --lawsnotes-font-body: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --lawsnotes-font-heading: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --lawsnotes-paper-max-width: 1280px;
+    --lawsnotes-logo-opacity: 0.3;
+    --lawsnotes-logo-height: 100vh;
+}
+
+/* Hide the article-options bar's "Cite article" dropdown entirely.
+   The Foundation reveal modals it points at don't open reliably on
+   the UCL Laws layout (something is intercepting clicks on the menu
+   items). The OSCOLA "How to cite" block below the abstract is the
+   canonical citation surface for this journal anyway. Gated on a
+   class added by lawsnotes.js when the per-journal `hide_cite_dropdown`
+   setting is on, so editors can flip it off without code edits. */
+body.lawsnotes-hide-cite-dropdown .mini-bar ul.menu > li:has(> button[data-toggle] > i.fa-comments) {
+    display: none !important;
+}
+
+/* Janeway templates emit a Bootstrap-style `.sr-only` h1 (e.g.
+   "Constitutional Insights Home Page") for screen-readers. Foundation's
+   own equivalent class is `.show-for-sr`, so without this rule the h1
+   is visible on sighted layouts. */
+.sr-only {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0);
+    white-space: nowrap; border: 0;
+}
+
+/* ============================================================
+   0. WEBFONTS (Newsreader, served from this plugin)
+   ============================================================ */
+
+/* Variable WOFF2: opsz + wght axes. We use font-optical-sizing: auto so
+   the browser drives opsz from font-size, and font-weight: 200 800 to
+   declare the available weight range -- so a single @font-face covers
+   regular, bold, semibold, and everything in between. The italic file is
+   declared separately because <em>/<i> selects font-style: italic. */
+@font-face {
+    font-family: 'Newsreader';
+    src: url('/static/lawsnotes/fonts/Newsreader.woff2') format('woff2-variations'),
+         url('/static/lawsnotes/fonts/Newsreader.woff2') format('woff2');
+    font-weight: 200 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Newsreader';
+    src: url('/static/lawsnotes/fonts/Newsreader-Italic.woff2') format('woff2-variations'),
+         url('/static/lawsnotes/fonts/Newsreader-Italic.woff2') format('woff2');
+    font-weight: 200 800;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* Apply Newsreader to article-page typography. Scoped to the elements
+   we own; the rest of the journal site keeps the theme's normal stack. */
+#article,
+#article p,
+#article li,
+#article h1, #article h2, #article h3, #article h4, #article h5, #article h6,
+#main_article,
+#main_article p,
+#main_article li,
+#main_article h1, #main_article h2, #main_article h3, #main_article h4, #main_article h5, #main_article h6,
+#main_article ol.footnotes,
+#main_article ol.footnotes li,
+section.no-padding.meta,
+section.no-padding.meta h1,
+section.no-padding.meta p,
+section.no-padding.meta small,
+section.no-padding.meta li,
+section.no-padding.meta a,
+.olh-banner-heading,
+.olh-banner-heading h1,
+.olh-banner-heading p,
+.lawnotes-sidenote,
+.lawnotes-sidenote-body,
+.lawnotes-tooltip,
+.lawnotes-files,
+.lawnotes-details,
+#article_how_to_cite {
+    font-family: var(--lawsnotes-font-body, 'Newsreader', Georgia, 'Times New Roman', serif) !important;
+    font-optical-sizing: auto;
+}
+
+/* Newsreader's 400 reads a touch light at body sizes; 460 keeps the
+   serif texture but gives the page a fractionally heavier colour.
+   Headings push to 650 so they're noticeably weightier than body. */
+#article,
+#article p,
+#article li,
+#main_article,
+#main_article p,
+#main_article li,
+#main_article ol.footnotes,
+#main_article ol.footnotes li,
+.lawnotes-sidenote,
+.lawnotes-sidenote-body,
+.lawnotes-tooltip,
+.lawnotes-files,
+.lawnotes-details,
+#article_how_to_cite,
+#article_how_to_cite #cite-content {
+    font-weight: 460;
+}
+#article h1, #article h2, #article h3, #article h4, #article h5, #article h6,
+#main_article h1, #main_article h2, #main_article h3, #main_article h4, #main_article h5, #main_article h6,
+.olh-banner-heading h1,
+#article_how_to_cite > h2 {
+    font-weight: 650;
+}
+.lawnotes-sidenote-number,
+.lawnotes-tooltip-num,
+.lawnotes-details-item strong {
+    font-weight: 700;
+}
+
+/* Dyslexia mode. OLH's toggleDyslexia() adds .dyslexia-friendly to every
+   element inside #article (not to <body>), and OLH's own rule
+   `.dyslexia-friendly { font-family: Verdana !important }` has only
+   [0,1,0] specificity -- losing to our [1,0,1] `#article p`/etc. rules.
+   The fix is to add Verdana rules at [1,1,0] (id + class) so they win.
+   We also propagate dyslexia to sidenotes/tooltip via a body-level
+   marker class added by sidenotes.js when the button is clicked. */
+#article .dyslexia-friendly,
+#article.dyslexia-friendly,
+#article .dyslexia-friendly *,
+body.lawnotes-dyslexia .lawnotes-sidenote,
+body.lawnotes-dyslexia .lawnotes-sidenote *,
+body.lawnotes-dyslexia .lawnotes-tooltip,
+body.lawnotes-dyslexia .lawnotes-tooltip *,
+body.lawnotes-dyslexia .olh-banner-heading,
+body.lawnotes-dyslexia .olh-banner-heading * {
+    font-family: Verdana, sans-serif !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+}
+#article h1.dyslexia-friendly,
+#article h2.dyslexia-friendly,
+#article h3.dyslexia-friendly,
+#article h4.dyslexia-friendly,
+#article h5.dyslexia-friendly,
+#article h6.dyslexia-friendly,
+body.lawnotes-dyslexia .olh-banner-heading h1,
+#article_how_to_cite.dyslexia-friendly > h2 {
+    font-weight: bold !important;
+}
+
+/* Italic abstract. The OLH template emits plain <p>s directly under
+   #article between the Abstract <h3> and the next section -- no class
+   to target -- so sidenotes.js tags them with .lawnotes-abstract. */
+.lawnotes-abstract {
+    font-style: italic;
+    color: #2a2a2a;
+}
+
+/* lawnotes / sidenotes.css
+ *
+ * Two responsibilities, one file:
+ *
+ *   1. MINIMALIST CHROME -- hide the cover banner, collapse the views/downloads
+ *      callout into an inline metadata line, hide the right sidebar (with a
+ *      discreet toggle to extend it back), reposition the galley file links
+ *      under the abstract, and tighten typography.  Restyles stock OLH markup;
+ *      journal-scoped via the plugin's head_css hook.
+ *
+ *   2. SIDENOTES + TOOLTIPS -- the visual side of sidenotes.js.  Sidenotes
+ *      are absolute-positioned in an overlay layer (the JS does the math);
+ *      this file just gives them their look.  Tooltips for the rollover-note
+ *      mode are likewise styled here.
+ *
+ *  Sidenotes activate at ≥1280px (sidenotes.js / matchMedia).  Below that,
+ *  the tooltip is the only progressive layer; the canonical endnote list at
+ *  the foot of the article remains visible as the always-on fallback.
+ */
+
+/* ============================================================
+   1. MINIMALIST CHROME
+   ============================================================ */
+
+/* ============================================================
+   PAPER-ON-PAGE EFFECT
+   ============================================================
+   One unified paper. The article template wraps the title block, the
+   article-options mini-bar, and the body content in a single outer
+   <section>:
+
+       <section>
+         <section class="no-padding meta ...">    title + authors
+         <div data-sticky-container class="row">  mini-bar
+         <section id="content">                   body + sidebar
+       </section>
+
+   We hit that outer section via :has(> section#content) and make it
+   the paper, then strip the children of any paper styling so they
+   all sit flush on the same sheet. */
+body section:has(> section#content) {
+    max-width: var(--lawsnotes-paper-max-width, 1280px);
+    margin: 1rem auto 3rem !important;
+    background: #ffffff !important;
+    padding: 2rem 0 3rem !important;
+    box-shadow:
+        0 24px 48px -16px rgba(17, 59, 58, 0.12),
+        0 8px 16px -8px rgba(17, 59, 58, 0.08);
+}
+/* Inner sections shed their own background, width and shadow so they
+   read as one continuous sheet. */
+body section:has(> section#content) > section.no-padding.meta,
+body section:has(> section#content) > section#content,
+body section:has(> section#content) > [data-sticky-container] {
+    max-width: none !important;
+    margin: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+section.no-padding.meta { padding: 0.5rem 0 !important; }
+section#content { padding: 0 !important; }
+
+/* The cover image + dark overlay are removed, but the banner section is
+   kept visible because that's where the title and author list live in
+   OLH's article template (lines 38-58 of journal/article.html).  The
+   banner is then flattened to a plain heading block so title + authors
+   sit on the page background in normal text colour. */
+.olh-banner-image,
+.olh-banner > .overlay,
+#author_biographies {
+    display: none !important;
+}
+section.no-padding.meta {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+section.no-padding.meta .row {
+    max-width: 760px;
+    margin: 0 auto !important;
+}
+.olh-banner {
+    background: transparent !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    padding: 1.5rem 1rem 0.4rem !important;
+    color: inherit !important;
+}
+.olh-banner-heading {
+    position: static !important;
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+.olh-banner-heading h1 {
+    /* Journal banner uses the dark-blue brand colour for top-of-page
+       identity; body-text accents (links, citation, sidenote borders,
+       drop caps) use the dark green. */
+    color: var(--lawsnotes-color-secondary, #002248) !important;
+    text-shadow: none !important;
+}
+.olh-banner-heading p,
+.olh-banner-heading a {
+    color: #222 !important;
+    text-shadow: none !important;
+}
+.olh-banner-heading h1 {
+    /* Newsreader (serif) inherits from the global rule; we just size it. */
+    font-size: 3em;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0.2em 0 0.5em;
+    font-weight: 650;
+}
+.olh-banner-heading p.uppercase {
+    color: #777 !important;
+    font-size: 0.78em;
+    letter-spacing: 0.08em;
+    margin: 0;
+}
+/* Hide the "Authors" label that sits between the title and the author
+   list. After our JS wraps the section-name <p> in a .lawsnotes-section-row
+   the old :nth-of-type(2) selector no longer matches, so we target the
+   p.uppercase that follows the H1 instead. */
+.olh-banner-heading h1 ~ p.uppercase { display: none !important; }
+
+/* Author list: a touch bigger and slightly heavier than body text. */
+.olh-banner-heading ul.list-no-bullet,
+.olh-banner-heading ul.list-no-bullet li,
+section.no-padding.meta.show-for-small-only ul.list-no-bullet,
+section.no-padding.meta.show-for-small-only ul.list-no-bullet li {
+    font-size: 1.18em;
+    font-weight: 520;
+    line-height: 1.4;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.olh-banner-heading ul.list-no-bullet li,
+section.no-padding.meta.show-for-small-only ul.list-no-bullet li {
+    margin: 0.1em 0;
+}
+
+/* ---------- Mobile-width meta block (show-for-small-only) ----------
+   On narrow viewports Foundation swaps to the show-for-small-only
+   variant of the meta section, which uses different markup: <small>
+   labels, no .olh-banner wrapper, no .olh-banner-heading. Mirror the
+   desktop styling here so the title + authors look identical at any
+   width. */
+section.no-padding.meta.show-for-small-only {
+    padding: 1.2rem 1rem 0.5rem !important;
+}
+section.no-padding.meta.show-for-small-only h1 {
+    color: var(--lawsnotes-color-secondary, #002248) !important;
+    font-size: 2.2em;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    font-weight: 650;
+    margin: 0.2em 0 0.4em;
+}
+section.no-padding.meta.show-for-small-only small.uppercase {
+    color: #777 !important;
+    font-size: 0.78em;
+    letter-spacing: 0.08em;
+}
+/* The "Authors" label that follows the title in the small-only layout.
+   Section-name <small> may sit inside our .lawsnotes-section-row wrapper,
+   so target by position relative to the H1 instead. */
+section.no-padding.meta.show-for-small-only h1 ~ small.uppercase {
+    display: none !important;
+}
+section.no-padding.meta.show-for-small-only svg,
+section.no-padding.meta.show-for-small-only a svg {
+    width: 14px !important;
+    height: 14px !important;
+    vertical-align: middle !important;
+    margin-left: -0.15em;
+    position: relative;
+    top: -0.05em;
+}
+
+/* ORCID badge SVGs are emitted with inline style="width:24px"; shrink
+   them with !important so the inline rule loses. The OLH template inserts
+   <span>&nbsp;</span> between name and badge, so a small negative
+   margin-left pulls the badge back close to the surname.
+   vertical-align: middle aligns the badge mid-line with the text. */
+.olh-banner-heading svg,
+.olh-banner-heading a svg {
+    width: 14px !important;
+    height: 14px !important;
+    vertical-align: middle !important;
+    margin-left: -0.15em;
+    position: relative;
+    top: -0.05em;
+}
+
+/* The "Views / Downloads / Citations" callout is hidden -- its content is
+   harvested by sidenotes.js and re-rendered inside the "More article
+   details" collapsible below the abstract. */
+.summary { display: none !important; }
+
+/* Mini-bar of article options: keep functional, flatten visual weight,
+   and force a single non-collapsible horizontal row at every viewport
+   width. Foundation's responsive-menu / title-bar gives a wonky drop-
+   down on small screens that doesn't need to exist for our 5-button
+   row -- just lay them out flat. */
+.mini-bar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 1rem !important;
+    margin: 0 0 0.5em !important;
+}
+/* Kill the "Article Options" disclosure toggle that Foundation shows
+   on small screens; the menu sits visible at all widths. */
+.mini-bar .title-bar { display: none !important; }
+.mini-bar #options-menu { display: block !important; }
+/* Drop Foundation column widths/offsets/floats so the menu sits flush
+   under the title rather than being pushed by a 2/12 offset. */
+.mini-bar #options-menu > .columns,
+.mini-bar #options-menu .float-right {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+}
+.mini-bar > .row { width: 100% !important; max-width: none !important; }
+/* Make the top-level option list a clean horizontal row. The nested
+   citation-styles submenu (Harvard / Vancouver / APA / RIS / BibTeX)
+   stays as a vertical dropdown -- only the outer ul is flattened. */
+.mini-bar > .row > #options-menu ul.menu.vertical.medium-horizontal,
+.mini-bar > .row > #options-menu > .columns > .float-right > ul.menu {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end;
+    align-items: center;
+    list-style: none;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.mini-bar > .row > #options-menu ul.menu.vertical.medium-horizontal > li {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+.mini-bar .menu a,
+.mini-bar .menu button {
+    background: transparent !important;
+    color: #888 !important;
+    font-size: 0.78em !important;
+    padding: 0.25em 0.55em !important;
+    line-height: 1.4 !important;
+}
+.mini-bar .menu a:hover,
+.mini-bar .menu button:hover { color: var(--lawsnotes-color-primary, #113B3A) !important; }
+
+/* Right sidebar: hidden permanently. Its content is flattened into a
+   collapsible "More article details" block under the abstract by
+   sidenotes.js (.lawnotes-details), and DOI is moved into How-to-cite. */
+section.side-info { display: none !important; }
+
+/* Drop the Foundation column widths so the article body can centre itself
+   in the row.  The .large-8 wrapper goes full-width, and #article inside
+   it gets a max-width so wide screens still leave gutter space for
+   absolute-positioned sidenotes. */
+#content > .row > .large-8.columns.border-right {
+    width: 100% !important;
+    float: none !important;
+    border-right: none !important;
+    margin: 0 auto !important;
+}
+#content > .row > .large-8.columns.border-right > .row > #article.large-10.columns {
+    width: 100% !important;
+    max-width: 760px;
+    margin: 0 auto !important;
+    float: none !important;
+    padding: 1.5rem 1rem !important;
+    /* Bump the base body size by 2pt; em/percent rules inside scale
+       proportionally, so headings grow with body. */
+    font-size: calc(1rem + 2pt);
+}
+
+/* "How to Cite:" -- inline with the citation text, same font/size,
+   not a stacked heading. */
+#article_how_to_cite {
+    margin: 1em 0 1.2em !important;
+    font-size: 0.92em;
+}
+#article_how_to_cite > h2 {
+    display: inline !important;
+    /* font-size/line-height intentionally not !important: OLH's
+       text_readability.js initialise() bakes the computed px size into
+       each element's inline style.fontSize (no !important). A stylesheet
+       !important rule would beat that non-important inline value, leaving
+       h2 still inheriting -- and on resize, getComputedStyle would then
+       return the parent's freshly-grown size, which resizeText would
+       multiply by 1.2 again. That cascading re-multiplication is what
+       drifted "Citation:" out of sync with the citation text on every
+       A+/A- click. Without !important, initialise() wins and the
+       inheritance chain is broken cleanly. */
+    font-size: inherit;
+    font-weight: bold !important;
+    margin: 0 0.4em 0 0 !important;
+    line-height: inherit;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: inherit !important;
+}
+#article_how_to_cite > div,
+#article_how_to_cite > div > p {
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: inherit;
+    line-height: inherit;
+}
+#article_how_to_cite #cite-content { font-size: inherit; }
+/* Hide OLH's "Copy" button next to the citation -- visually loud,
+   not part of the minimalist read-the-paper layout. */
+#article_how_to_cite button,
+#article_how_to_cite .copy-button { display: none !important; }
+#article_how_to_cite a {
+    color: var(--lawsnotes-color-primary, #113B3A);
+    text-decoration: underline;
+    text-decoration-color: rgba(17, 59, 58, 0.25);
+}
+#article_how_to_cite a:hover { text-decoration-color: var(--lawsnotes-color-primary, #113B3A); }
+
+/* Every hyperlink inside the article body and its surrounds picks up
+   the same forest-green so they match each other and the footnote/
+   sidenote/tooltip links.  Without this, the theme's default link colour
+   (a light blue) leaks through on prose links inside the JATS body. */
+#article a,
+#article a:visited,
+#main_article a,
+#main_article a:visited,
+.lawnotes-sidenote a,
+.lawnotes-tooltip a,
+.lawnotes-files a,
+.lawnotes-details-body a,
+#article_how_to_cite a {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+#article a:hover,
+#main_article a:hover,
+.lawnotes-sidenote a:hover,
+.lawnotes-tooltip a:hover {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+
+/* Author-name links (whole name + ORCID badge wrapped in <a> pointing
+   to the author's ORCID profile) shouldn't read as blue/green prose
+   links -- the name is the name, the badge is the affordance.
+   Keep the text dark and only colour on hover. */
+.olh-banner-heading a,
+.olh-banner-heading a:visited,
+.olh-banner-heading ul.list-no-bullet a,
+section.no-padding.meta a,
+section.no-padding.meta a:visited,
+section.no-padding.meta ul.list-no-bullet a {
+    color: #222 !important;
+    text-decoration: none !important;
+}
+.olh-banner-heading a:hover,
+section.no-padding.meta a:hover {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+
+/* "Article details" collapsible (injected by sidenotes.js). The
+   summary is styled as the same kind of underlined link button as
+   the download links above, with the arrow stacked below the label.
+   Body opens below the summary on click (default <details>
+   behaviour). */
+.lawnotes-details {
+    margin: 0.4em 0 1.4em;
+    font-size: 0.92em;
+    color: #555;
+    text-align: center;
+}
+.lawnotes-details > summary {
+    display: inline-block;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    padding: 0;
+    color: var(--lawsnotes-color-primary, #113B3A);
+    font-size: 0.88em;
+    line-height: 1.2;
+}
+.lawnotes-details > summary::-webkit-details-marker { display: none; }
+.lawnotes-details > summary .lawsnotes-summary-label {
+    display: inline-block;
+    border-bottom: 1px solid rgba(17, 59, 58, 0.25);
+    padding-bottom: 0;
+    color: var(--lawsnotes-color-primary, #113B3A);
+    text-decoration: none;
+}
+.lawnotes-details > summary::after {
+    content: "▾";
+    display: block;
+    text-align: center;
+    margin-top: 0.15em;
+    font-size: 0.85em;
+    line-height: 1;
+    color: var(--lawsnotes-color-primary, #113B3A);
+    transition: transform 120ms ease;
+}
+.lawnotes-details[open] > summary::after {
+    transform: rotate(180deg);
+}
+.lawnotes-details > summary:hover .lawsnotes-summary-label {
+    border-bottom-color: var(--lawsnotes-color-primary, #113B3A);
+}
+.lawnotes-details-body {
+    margin-top: 0.6em;
+    line-height: 1.6;
+}
+.lawnotes-details-item { display: inline; }
+.lawnotes-details-item strong {
+    color: #333;
+    font-weight: 600;
+}
+.lawnotes-details-sep {
+    color: #bbb;
+    margin: 0 0.5em;
+}
+.lawnotes-details-body a { color: var(--lawsnotes-color-primary, #113B3A); }
+.lawnotes-details-body p { display: inline; margin: 0; }
+.lawnotes-details-body ul, .lawnotes-details-body li {
+    display: inline; list-style: none; margin: 0; padding: 0;
+}
+
+/* Files block under the abstract (injected by sidenotes.js).
+   Centred horizontally with a 2px rule (matching the sidenote
+   vertical borders in colour and weight) flanking the centred
+   link group on the far left and far right. */
+.lawnotes-files {
+    margin: 0.6em 0 1.4em;
+    padding: 0;
+    font-size: 0.88em;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+.lawnotes-files::before,
+.lawnotes-files::after {
+    content: "";
+    flex: 1 1 0;
+    min-width: 1.5em;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.35);
+}
+.lawnotes-files ul {
+    flex: 0 0 auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+.lawnotes-files li { display: inline; margin-right: 1em; }
+.lawnotes-files li:last-child { margin-right: 0; }
+.lawnotes-files a {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    /* text-decoration must win against Foundation or press-override CSS that sets
+       `a[target="_blank"] { text-decoration: underline }`. Without
+       !important, "View PDF" picks up that underline AND our
+       border-bottom, producing a double line. */
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-underline-offset: 0 !important;
+    border-bottom: 1px solid rgba(17, 59, 58, 0.25) !important;
+    padding-bottom: 0 !important;
+    box-shadow: none !important;
+    display: inline-block;
+    line-height: 1.2;
+}
+.lawnotes-files a:hover {
+    border-bottom-color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+
+/* Hide OLH's small-only files block (`<div class="show-for-small-only">`
+   right under the abstract) -- our injected .lawnotes-files block
+   already covers every viewport, so on mobile the original would
+   render underneath ours as a duplicate "Files: XML / XML". */
+#article > div.show-for-small-only { display: none !important; }
+
+/* Tighten typography. Press CSS may override; we just nudge. */
+#article h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.9em;
+    line-height: 1.25;
+    margin-top: 0.2em;
+}
+#article h3 {
+    font-size: 1.05em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--lawsnotes-color-secondary, #002248);
+}
+#article p { line-height: 1.6; }
+
+/* Headers in the article body itself (the JATS-rendered prose). The
+   palette steps from the dark logo forest at h1/h2 down through teal
+   to sage as headings get smaller. */
+#main_article h1,
+#article h1 {
+    color: var(--lawsnotes-color-primary, #113B3A);
+}
+#main_article h2,
+#article h2:not(#article_how_to_cite > h2) {
+    color: var(--lawsnotes-color-primary, #113B3A);
+}
+#main_article h3 {
+    color: var(--lawsnotes-color-primary, #113B3A);
+}
+#main_article h4 {
+    color: var(--lawsnotes-color-secondary, #002248);
+}
+#main_article h5,
+#main_article h6 {
+    color: rgba(17, 59, 58, 0.7);
+}
+
+/* ============================================================
+   2. INLINE MARKERS
+   ============================================================ */
+
+a.xref-fn {
+    /* Suppress the iOS long-press context menu / link preview that
+       otherwise hijacks the tap on a footnote marker. Without this,
+       a long press on iOS Safari/Firefox triggers the system's
+       "Open Link / Copy Link" sheet and a short press follows the
+       href to the bottom-of-article endnote list. */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+}
+a.xref-fn sup {
+    color: var(--lawsnotes-color-primary, #113B3A);
+    cursor: pointer;
+    padding: 0 1px;
+    border-radius: 2px;
+    transition: background 120ms ease;
+}
+a.xref-fn:hover sup,
+a.xref-fn:focus sup,
+a.xref-fn.lawnotes-hover sup {
+    background: rgba(17, 59, 58, 0.18);
+    outline: none;
+}
+
+/* ============================================================
+   3. SIDENOTE OVERLAY LAYER (≥1280px)
+   ============================================================ */
+
+.lawnotes-sidenote-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.lawnotes-sidenote {
+    position: absolute;
+    pointer-events: auto;
+    cursor: pointer;
+    box-sizing: border-box;
+    font-family: Georgia, "Times New Roman", serif;
+    /* var(--lawsnotes-overlay-bump) is incremented by the A+/A- buttons via
+       bridgeResizeText() in lawsnotes.js (1pt per step). */
+    font-size: calc(0.78em + 0.5pt + var(--lawsnotes-overlay-bump, 0pt));
+    line-height: 1.45;
+    /* iOS WebKit (Safari, DDG-on-iOS, etc.) auto-inflates text inside
+       narrow blocks per-paragraph with different multipliers, which
+       made sidenote lines render at visibly different sizes within a
+       single aside. 100% disables the inflation while still honouring
+       the user's pinch-zoom (unlike `none`). No-op on non-WebKit. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    color: #333;
+    background: transparent;
+    transition: background 200ms ease;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+/* Long URLs in footnotes: allow mid-line break at any character, but
+   don't force the URL onto a new line first. `word-break: break-all`
+   does the latter -- it preferentially moves a long token to the next
+   line before breaking it. `overflow-wrap: anywhere` alone lets the
+   token start mid-line and break only when it hits the edge. */
+.lawnotes-sidenote a { overflow-wrap: anywhere; word-break: normal; }
+
+.lawnotes-sidenote--right {
+    padding-left: 0.8em;
+    border-left: 2px solid rgba(0, 0, 0, 0.35);
+    text-align: left;
+}
+.lawnotes-sidenote--left {
+    padding-right: 0.8em;
+    border-right: 2px solid rgba(0, 0, 0, 0.35);
+    text-align: right;
+}
+
+.lawnotes-sidenote-number {
+    color: var(--lawsnotes-color-primary, #113B3A);
+    font-weight: bold;
+    font-size: 0.85em;
+    vertical-align: super;
+    margin-right: 0.3em;
+}
+.lawnotes-sidenote--left .lawnotes-sidenote-number {
+    margin-right: 0;
+    margin-left: 0.3em;
+}
+
+/* Body is a block so its line box is the aside's content width (220px).
+   Without this constraint the URL inside an anchor doesn't have anything
+   to wrap against and overflow-wrap: anywhere has no effect. */
+.lawnotes-sidenote-body { display: block; }
+.lawnotes-sidenote-body p { display: inline; margin: 0; }
+.lawnotes-sidenote-body p + p { display: block; margin-top: 0.5em; }
+.lawnotes-sidenote a { color: var(--lawsnotes-color-primary, #113B3A); text-decoration: underline; }
+
+.lawnotes-sidenote.lawnotes-hover {
+    background: rgba(17, 59, 58, 0.16);
+}
+
+/* Long notes collapse with a "more" toggle (managed by JS). */
+.lawnotes-sidenote--folded {
+    max-height: 240px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(180deg, black 75%, transparent);
+            mask-image: linear-gradient(180deg, black 75%, transparent);
+}
+.lawnotes-sidenote--folded.lawnotes-sidenote--expanded {
+    max-height: none;
+    -webkit-mask-image: none;
+            mask-image: none;
+}
+.lawnotes-sidenote-expand {
+    display: block;
+    margin-top: 0.4em;
+    background: transparent;
+    border: none;
+    color: var(--lawsnotes-color-primary, #113B3A);
+    font-size: 0.95em;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+}
+.lawnotes-sidenote--left .lawnotes-sidenote-expand { margin-left: auto; }
+
+/* Brief flash when a marker is clicked while sidenotes are active. */
+.lawnotes-sidenote--flash {
+    background: rgba(17, 59, 58, 0.28) !important;
+}
+
+/* When sidenotes are active the canonical endnote list is redundant.
+   Gated on the absence of `lawsnotes-keep-endnote-list` so editors can
+   flip the per-journal `hide_endnote_list_when_sidenotes` setting
+   off and have the list reappear. */
+body.lawnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article ol.footnotes {
+    display: none;
+}
+
+/* Long URLs in footnotes need to break inside their slot rather than
+   overflow.  Apply to every container the note can land in: the bottom-
+   of-article endnote list, the sidenote layer, and the tooltip.  Targeting
+   descendants explicitly because some inline children (anchors, code,
+   spans) don't inherit overflow-wrap reliably across browsers. */
+#main_article ol.footnotes,
+#main_article ol.footnotes *,
+.lawnotes-sidenote,
+.lawnotes-sidenote *,
+.lawnotes-tooltip,
+.lawnotes-tooltip * {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+}
+#main_article ol.footnotes a,
+.lawnotes-sidenote a,
+.lawnotes-tooltip a {
+    /* OLH ships `a[target="_blank"] { white-space: nowrap }` in app.css
+       which suppresses ALL wrapping in external links -- and word-break /
+       overflow-wrap can only modulate how to break, not whether to break.
+       So the actual fix for long URLs is to put white-space back to
+       normal first, then let break-all/anywhere do their work. */
+    white-space: normal !important;
+    /* `word-break: break-all` made the browser preferentially move the
+       URL to a new line before breaking; `word-break: normal` plus
+       `overflow-wrap: anywhere` lets it start mid-line and break only
+       at the edge. */
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+    min-width: 0;
+    /* A press-level override stylesheet may set these <a>s to
+       `display: inline-flex`,
+       which makes the anchor a flex container -- and inside a flex
+       container, <wbr> stops working as a soft break opportunity
+       because flex items are atomic. Force back to `inline` so the
+       text-shaping engine sees the wbr-tagged URL as a normal flowable
+       string. */
+    display: inline !important;
+}
+
+/* ============================================================
+   4. TOOLTIP (rollover note)
+   ============================================================ */
+
+.lawnotes-tooltip {
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 9999;
+    max-width: 360px;
+    background: var(--lawsnotes-color-page, #F2F2F2);
+    border: 1px solid var(--lawsnotes-color-primary, #113B3A);
+    border-radius: 3px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    padding: 0.75em 1em;
+    font-family: Georgia, "Times New Roman", serif;
+    /* Tracks the same A+/A- bump as sidenotes; see .lawnotes-sidenote. */
+    font-size: calc(0.9em + var(--lawsnotes-overlay-bump, 0pt));
+    line-height: 1.5;
+    /* Same iOS WebKit text-inflation guard as sidenotes. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    color: #222;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+/* On phones the tooltip should feel like a popover -- wide enough
+   to read, anchored to the bottom of the viewport rather than
+   crammed next to a 12px-tall marker. */
+@media (max-width: 600px) {
+    .lawnotes-tooltip {
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: 12px !important;
+        top: auto !important;
+        max-width: none;
+        width: auto;
+        font-size: 1em;
+        padding: 1em 1.1em;
+        max-height: 60vh;
+        overflow-y: auto;
+        box-shadow: 0 -6px 32px rgba(0, 0, 0, 0.25);
+    }
+}
+.lawnotes-tooltip a { overflow-wrap: anywhere; word-break: normal; }
+.lawnotes-tooltip--visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+.lawnotes-tooltip-num {
+    color: var(--lawsnotes-color-primary, #113B3A);
+    font-weight: bold;
+    margin-right: 0.3em;
+}
+.lawnotes-tooltip p { display: inline; margin: 0; }
+.lawnotes-tooltip a { color: var(--lawsnotes-color-primary, #113B3A); }
+
+/* ============================================================
+   5. NON-ARTICLE PAGES (homepage, articles list, issues, news, etc.)
+   ============================================================
+   The plugin's CSS loads on every journal page (head_css hook); JS
+   tags <body> with `lawsnotes-on` plus `lawsnotes-page-<root>`. Selectors
+   below scope to `body.lawsnotes-on` so we only restyle pages where the
+   plugin is enabled. */
+
+/* Newsreader on main content of every journal page (the existing
+   article-scoped rule already covers #article / #main_article). */
+body.lawsnotes-on #main-content,
+body.lawsnotes-on #main-content p,
+body.lawsnotes-on #main-content li,
+body.lawsnotes-on #main-content a,
+body.lawsnotes-on #main-content h1,
+body.lawsnotes-on #main-content h2,
+body.lawsnotes-on #main-content h3,
+body.lawsnotes-on #main-content h4,
+body.lawsnotes-on #main-content h5,
+body.lawsnotes-on #main-content h6,
+body.lawsnotes-on #main-content label,
+body.lawsnotes-on #main-content small,
+body.lawsnotes-on #main-content time,
+body.lawsnotes-on #main-content input,
+body.lawsnotes-on #main-content button,
+body.lawsnotes-on #main-content select {
+    font-family: var(--lawsnotes-font-body, 'Newsreader', Georgia, 'Times New Roman', serif);
+    font-optical-sizing: auto;
+}
+body.lawsnotes-on #main-content { font-weight: 460; }
+body.lawsnotes-on #main-content h1 {
+    color: var(--lawsnotes-color-primary, #113B3A);
+    font-size: 2.2em;
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 1rem 0 1rem;
+}
+body.lawsnotes-on #main-content h2 { color: var(--lawsnotes-color-primary, #113B3A); font-weight: 650; }
+body.lawsnotes-on #main-content h3 { color: var(--lawsnotes-color-primary, #113B3A); font-weight: 600; }
+body.lawsnotes-on #main-content h4 { color: var(--lawsnotes-color-secondary, #002248); font-weight: 600; }
+body.lawsnotes-on #main-content h5,
+body.lawsnotes-on #main-content h6 { color: rgba(17, 59, 58, 0.7); font-weight: 600; }
+
+/* Paper effect for non-article pages.
+   - Article pages have an outer <section> (handled by the
+     :has(> section#content) rule above).
+   - List/index pages render <main><section id="content">...</section></main>;
+     we paper-ify #content there.
+   - The home page renders the Latest Articles block plus the cover
+     banner and Current Issue blocks directly into #main-content with
+     no section#content wrapper, so we paper-ify #main-content itself
+     in that case (gated on .lawsnotes-page-home so we don't double-paper
+     the list pages).
+   The :not() guards keep article-page styling untouched. */
+body.lawsnotes-on:not(.lawsnotes-page-article):not(.lawsnotes-page-manager) #main-content > section#content,
+body.lawsnotes-on.lawsnotes-page-home #main-content {
+    max-width: 1080px;
+    margin: 1rem auto 3rem !important;
+    background: #ffffff;
+    padding: 2rem 1.5rem 3rem !important;
+    box-shadow:
+        0 24px 48px -16px rgba(17, 59, 58, 0.12),
+        0 8px 16px -8px rgba(17, 59, 58, 0.08);
+}
+/* The home page's #main-content is a <main> element; some of its
+   children (Foundation rows) may have their own max-width constraints
+   that look weird inside our narrower paper. Reset them. */
+body.lawsnotes-on.lawsnotes-page-home #main-content > .row,
+body.lawsnotes-on.lawsnotes-page-home #main-content > section,
+body.lawsnotes-on.lawsnotes-page-home #main-content > div {
+    max-width: none !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Hide the FontAwesome icon clutter that OLH sprinkles into list
+   pages -- text leads in this design. Targeting the icons inside
+   #main-content keeps the chrome (top-bar, footer) untouched. */
+body.lawsnotes-on #main-content .fa,
+body.lawsnotes-on #main-content .fas,
+body.lawsnotes-on #main-content .far,
+body.lawsnotes-on #main-content .fab,
+body.lawsnotes-on #main-content i[class*="fa-"],
+body.lawsnotes-on #main-content .article-thumbnail,
+body.lawsnotes-on #main-content img.article-thumbnail,
+body.lawsnotes-on #main-content .icon-recede,
+body.lawsnotes-on #main-content .superscript-icon {
+    display: none !important;
+}
+/* …but leave the inline-marker carets and the article-options bar
+   icons alone (they're intentional within the article page chrome). */
+body.lawsnotes-on.lawsnotes-page-article #main-content .mini-bar i.fa,
+body.lawsnotes-on.lawsnotes-page-article #main-content a.xref-fn,
+body.lawsnotes-on.lawsnotes-page-article #main-content a.xref-fn sup {
+    display: inline !important;
+}
+
+body.lawsnotes-on #main-content a {
+    color: var(--lawsnotes-color-primary, #113B3A);
+    text-decoration: underline;
+    text-decoration-color: rgba(17, 59, 58, 0.25);
+}
+body.lawsnotes-on #main-content a:hover {
+    color: var(--lawsnotes-color-primary, #113B3A);
+    text-decoration-color: var(--lawsnotes-color-primary, #113B3A);
+}
+
+/* ---------- Articles listing (`/articles/`) ---------- */
+
+/* Flatten the .box.article cards into a clean list */
+body.lawsnotes-on.lawsnotes-page-articles .box.article {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1em 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid var(--lawsnotes-color-page, #F2F2F2) !important;
+    position: relative;
+}
+body.lawsnotes-on.lawsnotes-page-articles .box.article:last-child {
+    border-bottom: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .box.article .show-for-large {
+    display: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .box.article .large-10.columns,
+body.lawsnotes-on.lawsnotes-page-articles .box.article [id$="-box-details"] {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .box.article h2 {
+    font-size: 1.25em !important;
+    line-height: 1.3 !important;
+    margin: 0 0 0.2em !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .box.article p {
+    margin: 0.1em 0 !important;
+    color: #444 !important;
+    font-size: 0.95em !important;
+    line-height: 1.4 !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .box.article .date {
+    color: #777;
+    font-size: 0.88em;
+}
+
+/* Filter accordion: lighter chrome, no foundation card look */
+body.lawsnotes-on.lawsnotes-page-articles .accordion {
+    border: none !important;
+    background: transparent !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .accordion-title,
+body.lawsnotes-on.lawsnotes-page-articles .accordion-content {
+    background: transparent !important;
+    border: none !important;
+    color: var(--lawsnotes-color-secondary, #002248) !important;
+}
+
+/* Pagination + sort row */
+body.lawsnotes-on.lawsnotes-page-articles .pagination,
+body.lawsnotes-on.lawsnotes-page-articles select,
+body.lawsnotes-on.lawsnotes-page-articles label {
+    color: #555;
+    font-size: 0.9em;
+}
+/* (older rule for select.input-group-field intentionally removed -- the
+   newer paginate_by-specific rule below handles all of its concerns.) */
+
+/* ---------- Issues listing (`/issues/`) ---------- */
+
+body.lawsnotes-on.lawsnotes-page-issues #main-content > section#content > .row > .large-12,
+body.lawsnotes-on.lawsnotes-page-issues #main-content > section#content > .row {
+    padding: 0 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issues h3 {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    font-weight: 500 !important;
+    font-size: 1.1em !important;
+    margin: 0.6em 0 0.4em !important;
+}
+body.lawsnotes-on.lawsnotes-page-issues .issue,
+body.lawsnotes-on.lawsnotes-page-issues .box {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--lawsnotes-color-page, #F2F2F2) !important;
+    box-shadow: none !important;
+    padding: 1em 0 !important;
+    margin: 0 !important;
+}
+
+/* ---------- News (`/news/`) ---------- */
+
+body.lawsnotes-on.lawsnotes-page-news article,
+body.lawsnotes-on.lawsnotes-page-news .box {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1em 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid var(--lawsnotes-color-page, #F2F2F2) !important;
+}
+body.lawsnotes-on.lawsnotes-page-news h2 a { color: var(--lawsnotes-color-primary, #113B3A) !important; font-weight: 650; }
+
+/* ---------- Search (`/search/`) ---------- */
+
+body.lawsnotes-on.lawsnotes-page-search input[type="search"],
+body.lawsnotes-on.lawsnotes-page-search input[type="text"] {
+    border: 1px solid rgba(17, 59, 58, 0.25);
+    background: var(--lawsnotes-color-page, #F2F2F2);
+    font-family: inherit;
+    padding: 0.6em 0.8em;
+}
+
+/* ---------- About / editorial team / collections ---------- */
+
+body.lawsnotes-on.lawsnotes-page-about #content,
+body.lawsnotes-on.lawsnotes-page-collections #content,
+body.lawsnotes-on.lawsnotes-page-editorialteam #content { line-height: 1.6; }
+
+/* (Homepage injection removed -- it was unreliable. Configure
+   Janeway's built-in homepage elements via the manager UI instead.) */
+
+/* ---------- Articles listing: hide filter/sort, surface abstracts ----- */
+
+/* Hide the desktop filter sidebar (.large-4 column) and let the main
+   articles column claim the full width. */
+body.lawsnotes-on.lawsnotes-page-articles #content > .row > .large-4.columns,
+body.lawsnotes-on.lawsnotes-page-articles aside.hide-for-large {
+    display: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles #content > .row > .large-8.columns.border-right {
+    width: 100% !important;
+    border-right: none !important;
+    float: none !important;
+    margin: 0 auto !important;
+}
+
+/* Hide the count + sort row entirely (the first .row in the Results
+   section, which contains [N results, sort label, sort select]).
+   IMPORTANT: this rule must NOT match the .pagination-block.row that
+   sits later in the same Results section -- that one carries the
+   records-per-page selector we want to keep. The earlier broader
+   `> .row > .columns:nth-child(N)` rule was incorrectly hitting the
+   pagination block's columns too, collapsing the select to 0×0. */
+body.lawsnotes-on.lawsnotes-page-articles section[aria-label="Results"] > .row:first-of-type {
+    display: none !important;
+}
+
+/* Pagination row: one tight right-aligned line "[10▾] records per page".
+   Markup is `.pagination-block.row` containing three columns: an empty
+   wide col, the select col, and the label col. We use inline-block
+   (rather than flex) for the columns -- flex's baseline alignment
+   doesn't behave consistently across browsers when one of the items
+   is a <select>, and was hiding the value on some renderers. */
+body.lawsnotes-on.lawsnotes-page-articles .pagination-block.row {
+    margin: 1.4em 0 1em !important;
+    padding: 0 !important;
+    font-size: 0.9em;
+    color: #5e6b66;
+    text-align: right;
+    /* Override Foundation's display:flex on .row, which competes with
+       the inline-block columns we want here. */
+    display: block !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .pagination-block.row > .columns {
+    display: inline-block !important;
+    vertical-align: middle;
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+    float: none !important;
+    padding: 0 0.4em 0 0 !important;
+    margin: 0 !important;
+}
+/* Hide the empty page-numbers placeholder column (large-8). */
+body.lawsnotes-on.lawsnotes-page-articles .pagination-block.row > .columns:first-child {
+    display: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles .pagination-block.row label {
+    display: inline !important;
+    margin: 0 !important;
+    color: #5e6b66 !important;
+    font-weight: 460 !important;
+    font-size: inherit !important;
+    line-height: 1.3 !important;
+    vertical-align: middle;
+}
+/* Records-per-page selector. Native rendering reverted (Foundation
+   forces appearance:none; we restore appearance:auto so the OS draws
+   the value + chevron). Quiet visual: thin green border, white bg,
+   forest-green Newsreader text, hover deepens the border. */
+body.lawsnotes-on.lawsnotes-page-articles select[name="paginate_by"] {
+    -webkit-appearance: auto !important;
+    -moz-appearance: auto !important;
+    appearance: auto !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid rgba(17, 59, 58, 0.25) !important;
+    border-radius: 2px !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    font-family: 'Newsreader', Georgia, serif !important;
+    font-size: 1em !important;
+    font-weight: 600 !important;
+    padding: 0.3em 0.4em !important;
+    margin: 0 !important;
+    height: auto !important;
+    line-height: 1.3 !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 4em !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles select[name="paginate_by"]:focus,
+body.lawsnotes-on.lawsnotes-page-articles select[name="paginate_by"]:hover {
+    outline: none !important;
+    border-color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+body.lawsnotes-on.lawsnotes-page-articles select[name="paginate_by"] option {
+    background: #ffffff;
+    color: #222;
+}
+
+/* Authors + date inline on one line, separated by a centred middot.
+   Author <p> and date <p> are siblings inside [id$="-box-details"];
+   the injected abstract uses a class that's excluded so it stays a
+   block on its own line below. */
+body.lawsnotes-on .box.article p:not(.lawsnotes-card-abstract) {
+    display: inline !important;
+    margin: 0 !important;
+}
+body.lawsnotes-on .box.article p:not(.lawsnotes-card-abstract) + p:not(.lawsnotes-card-abstract)::before {
+    content: " · ";
+    color: rgba(17, 59, 58, 0.25);
+    margin: 0 0.5em;
+    font-weight: 600;
+}
+
+/* The injected abstract on each card -- italic, slightly muted, on a
+   new line below the author/date row. */
+body.lawsnotes-on.lawsnotes-page-articles .lawsnotes-card-abstract {
+    display: block !important;
+    margin: 0.55em 0 0 !important;
+    color: #3a3a3a !important;
+    font-size: 0.95em !important;
+    line-height: 1.55 !important;
+    font-weight: 460 !important;
+    font-style: italic !important;
+}
+
+/* ---------- Issues listing: stacked list, no covers ----------
+   OLH renders issues as Foundation `medium-3` columns (3-up grid)
+   with cover images and a verbose Volume/Issue/Year heading. We
+   stack them to full width, hide the cover, and the JS relabels
+   each heading to "Volume X, YYYY" -- so the markup is identical
+   between covered/uncovered journals, only the styling changes. */
+body.lawsnotes-on.lawsnotes-page-issues #content > .row > .medium-3.columns,
+body.lawsnotes-on.lawsnotes-page-issues #content > .row > .medium-4.columns,
+body.lawsnotes-on.lawsnotes-page-issues #content > .row > .columns {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    float: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-issues .box.issue {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--lawsnotes-color-page, #F2F2F2) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 1em 0 !important;
+    margin: 0 !important;
+    position: relative;
+}
+body.lawsnotes-on.lawsnotes-page-issues .box.issue:last-child {
+    border-bottom: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-issues .box.issue img {
+    display: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-issues .box.issue .info-bar {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issues .box.issue h3 {
+    margin: 0 0 0.2em !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    font-size: 1.25em !important;
+    font-weight: 650 !important;
+    line-height: 1.25 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issues .box.issue p {
+    color: #5e6b66 !important;
+    font-size: 0.9em !important;
+    margin: 0 !important;
+    font-weight: 460 !important;
+}
+
+/* ---------- Per-issue page (`/issue/<id>/info/`) ---------- */
+
+/* Hide the floating sticky "Issue Archive" sidebar -- it duplicates
+   the issues list page and creates a ghostly overlay on scroll due
+   to Foundation's data-sticky module. */
+body.lawsnotes-on.lawsnotes-page-issue aside.large-4.columns,
+body.lawsnotes-on.lawsnotes-page-issue [data-sticky-container] {
+    display: none !important;
+}
+
+/* Promote the main column to full width so cards align with the
+   "Articles" heading at the page's left edge instead of indented
+   half a row over. */
+body.lawsnotes-on.lawsnotes-page-issue #content > .row > .large-8.border-right.columns,
+body.lawsnotes-on.lawsnotes-page-issue #content > .row > .large-8.columns.border-right {
+    width: 100% !important;
+    border-right: none !important;
+    float: none !important;
+}
+
+/* Flatten the issue-banner cover image; keep the heading text. */
+body.lawsnotes-on.lawsnotes-page-issue #issue_top .olh-banner-image,
+body.lawsnotes-on.lawsnotes-page-issue #issue_top .olh-banner > .overlay {
+    display: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue #issue_top .olh-banner {
+    background: transparent !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    padding: 0.5rem 0 !important;
+    margin: 0 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue .olh-banner-heading {
+    position: static !important;
+    background: transparent !important;
+    color: inherit !important;
+    text-align: left !important;
+    padding: 0 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue .olh-banner-heading h1 {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    text-shadow: none !important;
+    font-size: 2em !important;
+    font-weight: 650 !important;
+    line-height: 1.2 !important;
+    margin: 0 0 0.5em !important;
+    padding: 0 !important;
+    letter-spacing: -0.005em;
+}
+
+/* Page-level "Articles" section heading on the issue page */
+body.lawsnotes-on.lawsnotes-page-issue h2.em {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    font-style: normal !important;
+    font-weight: 650 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue hr {
+    border: none !important;
+    border-top: 1px solid var(--lawsnotes-color-page, #F2F2F2) !important;
+    margin: 0.5em 0 !important;
+}
+
+/* Article cards on the issue page: kill the indenting image column,
+   apply the same flat list styling as on /articles/. */
+body.lawsnotes-on.lawsnotes-page-issue .box.article .large-2.show-for-large {
+    display: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue .box.article .large-10.columns,
+body.lawsnotes-on.lawsnotes-page-issue .box.article [id$="-box-details"] {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    float: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue .box.article {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1em 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid var(--lawsnotes-color-page, #F2F2F2) !important;
+    position: relative;
+}
+body.lawsnotes-on.lawsnotes-page-issue .box.article:last-child {
+    border-bottom: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue .box.article h3 {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    font-size: 1.25em !important;
+    font-weight: 650 !important;
+    margin: 0 0 0.2em !important;
+    line-height: 1.3 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue .box.article p {
+    margin: 0.1em 0 !important;
+    color: #444 !important;
+    font-size: 0.95em !important;
+    line-height: 1.4 !important;
+}
+body.lawsnotes-on.lawsnotes-page-issue .box.article .date {
+    color: #777 !important;
+    font-size: 0.88em !important;
+}
+
+/* Italicised abstract regardless of which page renders the card. */
+body.lawsnotes-on .lawsnotes-card-abstract {
+    display: block !important;
+    margin: 0.55em 0 0 !important;
+    color: #3a3a3a !important;
+    font-size: 0.95em !important;
+    line-height: 1.55 !important;
+    font-weight: 460 !important;
+    font-style: italic !important;
+}
+
+/* ---------- Pagination (issue pages, news, etc.) ----------
+   Foundation's default `.pagination .current` is a blue pill. Strip
+   the chrome to text-typography: current page underlined in forest
+   green, others muted, no backgrounds. */
+body.lawsnotes-on .pagination {
+    list-style: none !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 0.6em;
+    margin: 1em 0 !important;
+    padding: 0 !important;
+    font-size: 0.9em;
+    justify-content: center;
+}
+body.lawsnotes-on .pagination li {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+body.lawsnotes-on .pagination li a {
+    background: transparent !important;
+    color: #5e6b66 !important;
+    padding: 0.15em 0.45em !important;
+    border: none !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid transparent !important;
+    text-decoration: none !important;
+    font-weight: 460 !important;
+}
+body.lawsnotes-on .pagination li a:hover {
+    background: transparent !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    border-bottom-color: rgba(17, 59, 58, 0.25) !important;
+}
+body.lawsnotes-on .pagination li.current,
+body.lawsnotes-on .pagination li.current a {
+    background: transparent !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid var(--lawsnotes-color-primary, #113B3A) !important;
+}
+
+/* ---------- Homepage element: Latest articles ----------
+   Rendered by Janeway's homepage view from a real HomepageElement
+   row (created at install time) with our template_path. The hook
+   `latest_articles_context` provides `lawsnotes_latest_articles`. Editors
+   can re-order or disable this from the manager's Edit Homepage
+   page. */
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest {
+    max-width: 760px;
+    margin: 1rem auto 3rem;
+    padding: 0 1rem;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest h2 {
+    font-size: 0.95em !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: var(--lawsnotes-color-secondary, #002248) !important;
+    font-weight: 600 !important;
+    margin: 0 0 1.4em !important;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--lawsnotes-color-page, #F2F2F2);
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-item {
+    padding: 1.1em 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid var(--lawsnotes-color-page, #F2F2F2);
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-item:last-child {
+    border-bottom: none;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-link {
+    display: block;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    text-decoration: none !important;
+    font-size: 1.18em;
+    font-weight: 650;
+    line-height: 1.3;
+    margin-bottom: 0.25em;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-link:hover {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-meta {
+    display: block;
+    color: #5e6b66 !important;
+    font-size: 0.92em;
+    font-weight: 460;
+    line-height: 1.4;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-abstract {
+    margin: 0.5em 0 0 !important;
+    color: #3a3a3a !important;
+    font-size: 0.95em !important;
+    line-height: 1.55 !important;
+    font-weight: 460 !important;
+    font-style: italic !important;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-more {
+    margin: 1.5em 0 0 !important;
+    text-align: right;
+    font-size: 0.95em;
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-more a {
+    color: var(--lawsnotes-color-secondary, #002248) !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid rgba(17, 59, 58, 0.25);
+}
+body.lawsnotes-on.lawsnotes-page-home .lawsnotes-latest-more a:hover {
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    border-bottom-color: var(--lawsnotes-color-primary, #113B3A);
+}
+
+/* ============================================================
+   ARTICLE PAGE: drop cap, abstract heading inline, title backdrop
+   ============================================================ */
+
+/* Drop cap. JS tags exactly one <p> per article (the first paragraph
+   in document order under the article body) with .lawsnotes-drop-cap, and
+   the rule below hangs ::first-letter styling off that single class.
+   Avoids the multi-match trap that pure CSS selectors hit when the
+   JATS body has nested <sec>/<div> structure. */
+body.lawsnotes-on.lawsnotes-page-article #main_article p.lawsnotes-drop-cap::first-letter {
+    float: left !important;
+    font-family: var(--lawsnotes-font-body, 'Newsreader', Georgia, 'Times New Roman', serif) !important;
+    font-size: 4em !important;
+    line-height: 0.85 !important;
+    font-weight: 700 !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    margin: 0.05em 0.12em -0.05em 0 !important;
+    padding: 0 !important;
+}
+
+/* Abstract heading floats left of the abstract body so it reads as
+   "ABSTRACT   body text..." on the same first line, with subsequent
+   lines wrapping below. white-space:nowrap guarantees one line for
+   the heading regardless of font; width is `auto` and we add a
+   right-margin gap. margin-top lifts the H3's cap-line so it sits
+   flush with the abstract body's first line baseline. */
+body.lawsnotes-on.lawsnotes-page-article #article > h3:first-of-type {
+    float: left !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    margin: 0.55em 1.4em 0 0 !important;
+    padding: 0 !important;
+    font-size: 0.72em !important;
+    color: var(--lawsnotes-color-secondary, #002248) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+}
+/* Clear the float at the next major block so subsequent sections
+   (citation, files, details, main article) start cleanly below the
+   abstract instead of wrapping around the heading's residual height. */
+body.lawsnotes-on.lawsnotes-page-article #article > #article_how_to_cite,
+body.lawsnotes-on.lawsnotes-page-article #article > .lawnotes-files,
+body.lawsnotes-on.lawsnotes-page-article #article > .lawnotes-details,
+body.lawsnotes-on.lawsnotes-page-article #article > .summary,
+body.lawsnotes-on.lawsnotes-page-article #article > #main_article {
+    clear: left;
+}
+
+/* Big transparent first letter sitting BEHIND the article title.
+   Set by sidenotes.js' setTitleDropLetter() onto data-first-letter,
+   then rendered as a ::before pseudo absolutely-positioned behind
+   the h1's text. z-index: -1 puts it under the title text but
+   inside the H1's stacking context, so it doesn't bleed through
+   other page elements. */
+body.lawsnotes-on.lawsnotes-page-article .olh-banner-heading h1 {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+}
+body.lawsnotes-on.lawsnotes-page-article .olh-banner-heading h1[data-first-letter]::before {
+    content: attr(data-first-letter);
+    position: absolute;
+    left: -0.05em;
+    /* Sit lower so the cap doesn't clip against the paper's top edge.
+       0 keeps the pseudo's top aligned with the H1 cap-line; the giant
+       letter then descends well below the title visually. */
+    top: -0.05em;
+    font-family: var(--lawsnotes-font-body, 'Newsreader', Georgia, 'Times New Roman', serif);
+    font-size: 4.5em;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--lawsnotes-color-primary, #113B3A);
+    opacity: 0.06;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.02em;
+}
+
+/* ---------- Article-card first-letter backdrop ----------
+   Same big-transparent-letter motif as the article-page title
+   backdrop, applied per-card on listings (articles list, issue
+   table of contents). JS stamps `data-first-letter` on each card;
+   the ::before below paints it left-aligned and vertically
+   centred behind the card content. */
+body.lawsnotes-on .box.article {
+    position: relative;
+    isolation: isolate;
+}
+body.lawsnotes-on .box.article[data-first-letter]::before {
+    content: attr(data-first-letter);
+    position: absolute;
+    left: -0.05em;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--lawsnotes-font-body, 'Newsreader', Georgia, 'Times New Roman', serif);
+    font-size: 5.5em;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--lawsnotes-color-primary, #113B3A);
+    opacity: 0.06;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+
+/* ---------- Homepage backdrop: tri-colour arches ----------
+   Three sweeping ribbons running left→right, interweaving, in the
+   logo's forest/sage/teal palette. Inline SVG via data: URL so the
+   whole effect ships in the same one CSS file -- no extra asset.
+   Painted on a fixed ::before pseudo so it stays put while the page
+   scrolls and sits behind all content via z-index: -1.
+
+   The viewBox is 1400×500 with `preserveAspectRatio=xMidYMin slice`
+   so on wide viewports the arches stretch the full width; tall/
+   narrow viewports show the arches band at the top with the rest of
+   the page below. Colours are URL-encoded with %23 (the # sentinel)
+   so the data: URL parses cleanly. Stroke opacities vary so the
+   overlaps deepen subtly without muddying. */
+body.lawsnotes-on.lawsnotes-page-home {
+    position: relative;
+}
+/* Cream backdrop on every UCL Laws page so the logo (and the white
+   article paper) read against a consistent background. */
+body.lawsnotes-on {
+    background-color: var(--lawsnotes-color-page, #F2F2F2) !important;
+}
+
+/* Optional backdrop logo on every page: as wide as the viewport,
+   anchored flush to the bottom edge, sitting BEHIND the article
+   paper (z-index: -1, fixed so it stays put while the page scrolls).
+   30% opacity so the white paper still reads as paper. */
+body.lawsnotes-on::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--lawsnotes-logo-height, 100vh);
+    z-index: -1;
+    pointer-events: none;
+    /* Set from the per-journal `logo_url` setting, which the head_css
+       hook emits as --lawsnotes-logo-image. No logo ships with the
+       plugin, so there is no fallback: when the setting is blank the
+       JS also adds .lawsnotes-no-logo below. */
+    background-image: var(--lawsnotes-logo-image, none);
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: 100% auto;
+    opacity: var(--lawsnotes-logo-opacity, 0.3);
+}
+body.lawsnotes-on.lawsnotes-no-logo::before {
+    background-image: none;
+}
+/* Slight breathing room: lift the latest-articles list off the
+   arches a touch so the heading doesn't sit on top of the darkest
+   curve. */
+body.lawsnotes-on.lawsnotes-page-home #main-content {
+    position: relative;
+    z-index: 1;
+    padding-top: 4rem;
+}
+
+/* ============================================================
+   Strip Foundation's primary-blue chrome
+   ============================================================
+   OLH/Foundation paints buttons, button-groups, callouts and
+   similar with a saturated blue. Replace with the journal's
+   white-on-forest-green palette: white background, hairline
+   sage border, forest-green text, deepening on hover. Scoped
+   to body.lawsnotes-on so unrelated journals on the press install
+   keep their default chrome. */
+body.lawsnotes-on .button,
+body.lawsnotes-on .button.primary,
+body.lawsnotes-on .button.secondary,
+body.lawsnotes-on .button.success,
+body.lawsnotes-on .button.alert,
+body.lawsnotes-on .button-group,
+body.lawsnotes-on .button-group > .button,
+body.lawsnotes-on button.button,
+body.lawsnotes-on a.button,
+body.lawsnotes-on input[type="submit"],
+body.lawsnotes-on input[type="button"],
+body.lawsnotes-on input[type="reset"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    border: 1px solid rgba(17, 59, 58, 0.25) !important;
+    border-radius: 2px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    text-transform: none !important;
+}
+body.lawsnotes-on .button-group {
+    /* Container itself shouldn't have its own background or border
+       -- only the inner buttons carry chrome. */
+    background: transparent !important;
+    border: none !important;
+}
+body.lawsnotes-on .button:hover,
+body.lawsnotes-on .button:focus,
+body.lawsnotes-on .button.primary:hover,
+body.lawsnotes-on .button.secondary:hover,
+body.lawsnotes-on button.button:hover,
+body.lawsnotes-on a.button:hover,
+body.lawsnotes-on input[type="submit"]:hover,
+body.lawsnotes-on input[type="button"]:hover {
+    background: var(--lawsnotes-color-page, #F2F2F2) !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    border-color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+
+/* Foundation callouts (.callout.primary etc.) -- same flatten. */
+body.lawsnotes-on .callout,
+body.lawsnotes-on .callout.primary,
+body.lawsnotes-on .callout.secondary,
+body.lawsnotes-on .callout.success,
+body.lawsnotes-on .callout.warning,
+body.lawsnotes-on .callout.alert {
+    background: #ffffff !important;
+    color: #222 !important;
+    border: 1px solid rgba(17, 59, 58, 0.25) !important;
+}
+body.lawsnotes-on .callout h2,
+body.lawsnotes-on .callout h3,
+body.lawsnotes-on .callout h4 { color: var(--lawsnotes-color-primary, #113B3A) !important; }
+
+/* Foundation labels/badges (small inline ".label.primary"). */
+body.lawsnotes-on .label,
+body.lawsnotes-on .label.primary,
+body.lawsnotes-on .label.secondary {
+    background: transparent !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    border: 1px solid rgba(17, 59, 58, 0.25) !important;
+}
+
+/* Reveal modal close-button (.close-button) often has a dark
+   background. Keep transparent with green X. */
+body.lawsnotes-on .reveal .close-button {
+    background: transparent !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+
+/* ============================================================
+   Anchor the article-options mini-bar to the paper top-right
+   ============================================================
+   The bar (print / A- / A+ / dyslexia / cite-styles) sits in
+   <div data-sticky-container> which Foundation makes sticky on
+   scroll. We pin it absolutely to the paper's top-right corner
+   instead, defeating Foundation's sticky behaviour. */
+body.lawsnotes-on.lawsnotes-page-article body section:has(> section#content),
+body.lawsnotes-on.lawsnotes-page-article section.no-padding.meta {
+    position: relative;  /* needed so the absolute mini-bar anchors here */
+}
+body.lawsnotes-on.lawsnotes-page-article [data-sticky-container] {
+    position: absolute !important;
+    top: 0.7rem !important;
+    right: 1rem !important;
+    width: auto !important;
+    z-index: 5;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* Foundation's sticky inner element copies the parent's positioning
+   info; force it to sit naturally inside the absolute wrapper. */
+body.lawsnotes-on.lawsnotes-page-article [data-sticky-container] .mini-bar.sticky,
+body.lawsnotes-on.lawsnotes-page-article [data-sticky-container] .mini-bar {
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+body.lawsnotes-on.lawsnotes-page-article .mini-bar > .row,
+body.lawsnotes-on.lawsnotes-page-article .mini-bar #options-menu,
+body.lawsnotes-on.lawsnotes-page-article .mini-bar #options-menu > .columns,
+body.lawsnotes-on.lawsnotes-page-article .mini-bar #options-menu .float-right {
+    display: inline-flex !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+}
+/* Only the OUTER button menu (direct child of .float-right) becomes a
+   horizontal flex row. The nested .menu (cite-styles submenu inside
+   the citation button) is handled separately below so Foundation's
+   data-toggle can still show/hide it on click. */
+body.lawsnotes-on.lawsnotes-page-article .mini-bar #options-menu .float-right > ul.menu {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.1em;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none;
+}
+
+/* Cite-styles submenu (nested ul.menu inside the citation button)
+   stays hidden until Foundation toggles its parent <li> open.
+   Anchor it to the citation button via position:relative on the <li>
+   and absolute on the submenu, opening leftward (right: 0) so it
+   stays inside the paper edge. */
+body.lawsnotes-on.lawsnotes-page-article .mini-bar #options-menu .float-right > ul.menu > li {
+    position: relative;
+}
+body.lawsnotes-on.lawsnotes-page-article .mini-bar ul.menu ul.menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    list-style: none;
+    background: #ffffff;
+    border: 1px solid rgba(17, 59, 58, 0.25);
+    border-radius: 2px;
+    margin: 0.2em 0 0 !important;
+    padding: 0.3em 0 !important;
+    min-width: 14em;
+    z-index: 50;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+body.lawsnotes-on.lawsnotes-page-article .mini-bar ul.menu ul.menu li {
+    width: 100%;
+    margin: 0 !important;
+}
+body.lawsnotes-on.lawsnotes-page-article .mini-bar ul.menu ul.menu a {
+    display: block;
+    padding: 0.45em 0.9em !important;
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+    font-size: 0.85em;
+    white-space: nowrap;
+    text-decoration: none;
+}
+body.lawsnotes-on.lawsnotes-page-article .mini-bar ul.menu ul.menu a:hover {
+    background: var(--lawsnotes-color-page, #F2F2F2);
+    color: var(--lawsnotes-color-primary, #113B3A) !important;
+}
+/* Show submenu only when its parent button is toggled open. Foundation
+   sets aria-expanded="true" on the trigger button when active. */
+body.lawsnotes-on.lawsnotes-page-article .mini-bar ul.menu > li:has(> button[aria-expanded="true"]) > ul.menu,
+body.lawsnotes-on.lawsnotes-page-article .mini-bar ul.menu > li.is-active > ul.menu,
+body.lawsnotes-on.lawsnotes-page-article .mini-bar ul.menu > li[aria-expanded="true"] > ul.menu {
+    display: block;
+}
+
+/* ============================================================
+   ARTICLE HEADER META (right-aligned volume / journal / page)
+   ============================================================
+   JS wraps the existing section-name <p class="uppercase"> in a
+   .lawsnotes-section-row flex container and inserts a sibling
+   <span class="lawsnotes-article-meta"> on the right. */
+body.lawsnotes-on.lawsnotes-page-article .lawsnotes-section-row {
+    display: flex !important;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1em;
+    margin: 0;
+}
+body.lawsnotes-on.lawsnotes-page-article .lawsnotes-section-row p.uppercase,
+body.lawsnotes-on.lawsnotes-page-article .lawsnotes-section-row small.uppercase {
+    margin: 0;
+}
+body.lawsnotes-on.lawsnotes-page-article .lawsnotes-article-meta {
+    color: #777;
+    font-size: 0.78em;
+    font-weight: 350;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: right;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+/* ============================================================
+   AUTHOR AFFILIATION (grey, thinner)
+   ============================================================
+   Higher-specificity selectors so the rule wins against
+   .olh-banner-heading p / a / li styling that already uses
+   !important. Newsreader is variable, so font-weight: 350
+   renders as a visibly thinner cut than the surrounding 520. */
+body.lawsnotes-on .olh-banner-heading .lawsnotes-author-affiliation,
+body.lawsnotes-on .olh-banner-heading .lawsnotes-author-affiliation *,
+body.lawsnotes-on section.no-padding.meta .lawsnotes-author-affiliation,
+body.lawsnotes-on section.no-padding.meta .lawsnotes-author-affiliation *,
+body.lawsnotes-on .lawsnotes-author-affiliation,
+body.lawsnotes-on .lawsnotes-author-affiliation * {
+    color: #888 !important;
+    font-weight: 350 !important;
+    font-style: normal !important;
+}
+
+/* ============================================================
+   FIRST LINE OF DROP-CAP PARAGRAPH IN SMALL CAPS
+   ============================================================
+   Pairs with the ::first-letter drop cap above. Browsers compute
+   ::first-line dynamically based on layout, so this stays correct
+   when the paragraph reflows. */
+body.lawsnotes-on.lawsnotes-page-article #main_article p.lawsnotes-drop-cap::first-line {
+    font-variant-caps: small-caps;
+    font-feature-settings: "smcp" 1;
+    letter-spacing: 0.04em;
+}
+

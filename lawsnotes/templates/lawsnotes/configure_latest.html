@@ -1,0 +1,46 @@
+{% extends "admin/core/base.html" %}
+
+{% block title %}Configure Latest Articles{% endblock title %}
+{% block title-section %}Configure Latest Articles{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'core_manager_index' %}">Manager</a></li>
+    <li><a href="{% url 'home_settings_index' %}">Edit Homepage</a></li>
+    <li>Latest Articles</li>
+{% endblock %}
+
+{% block body %}
+<section>
+    <div class="row expanded">
+        <div class="large-6 medium-12 small-12 columns">
+            <div class="box">
+                <div class="title-area">
+                    <h2>Latest Articles &mdash; <em>{{ request.journal.name }}</em></h2>
+                </div>
+                <div class="content">
+                    <p>How many recently-published articles should the
+                       <strong>Latest Articles</strong> homepage element show?</p>
+                    <form method="post" style="margin-top:1em;">
+                        {% csrf_token %}
+                        <label for="lawsnotes-latest-count" style="display:flex;align-items:center;gap:0.6em;">
+                            Articles to show:
+                            <input type="number"
+                                   id="lawsnotes-latest-count"
+                                   name="count"
+                                   value="{{ current }}"
+                                   min="1" max="50"
+                                   style="width:5em;">
+                        </label>
+                        <p style="font-size:0.85em;color:#777;margin-top:0.6em;">
+                            Between 1 and 50. Default is 10.
+                        </p>
+                        <button type="submit" class="button">Save</button>
+                        <a class="button secondary" href="{% url 'home_settings_index' %}">Back to homepage</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock body %}

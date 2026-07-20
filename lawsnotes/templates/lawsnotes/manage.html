@@ -1,0 +1,190 @@
+{% extends "admin/core/base.html" %}
+{% load static %}
+
+{% block title %}UCL Laws{% endblock title %}
+{% block title-section %}UCL Laws{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'core_manager_index' %}">Manager</a></li>
+    <li><a href="{% url 'core_plugin_list' %}">Plugins</a></li>
+    <li>UCL Laws</li>
+{% endblock %}
+
+{% block body %}
+<section>
+    <div class="row expanded">
+        <div class="large-10 medium-12 small-12 columns">
+            <div class="box">
+                <div class="title-area">
+                    <h2>UCL Laws styling for <em>{{ request.journal.name }}</em></h2>
+                </div>
+                <div class="content">
+                    <p>{{ plugin_settings.DESCRIPTION }}</p>
+
+                    <div style="background:#f5f9f7;border-left:3px solid #113B3A;padding:0.75em 1em;margin:1em 0;font-size:0.9em;">
+                        <strong>Who can change these settings?</strong>
+                        Janeway editors, journal managers, and superusers
+                        always have access. To delegate access to additional
+                        staff (production manager, copyeditor, …) without
+                        bothering the press administrator, list their role
+                        short-names under <em>Who can manage these settings?</em>
+                        below. They'll be able to edit the UCL Laws manage
+                        page from then on, scoped to this journal only.
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {# Master enable toggle #}
+                        <fieldset class="lawsnotes-section">
+                            <legend>Master switch</legend>
+                            <label style="display:flex;align-items:center;gap:0.6em;">
+                                <input type="checkbox"
+                                       name="{{ plugin_settings.SETTING_NAME }}"
+                                       value="on"
+                                       {% if enabled %}checked{% endif %}>
+                                <span>
+                                    {% if enabled %}
+                                        Enabled for <strong>{{ request.journal.code }}</strong>
+                                    {% else %}
+                                        Disabled for <strong>{{ request.journal.code }}</strong>
+                                    {% endif %}
+                                </span>
+                            </label>
+                            <p style="font-size:0.85em;color:#777;margin-top:0.5em;">
+                                When disabled, every other field below is ignored
+                                and the journal renders with stock OLH styling.
+                            </p>
+                        </fieldset>
+
+                        {% for section in sections %}
+                        <fieldset class="lawsnotes-section">
+                            <legend>{{ section.label }}</legend>
+                            {% for field in section.fields %}
+                                <div class="lawsnotes-field">
+                                    <label for="lawsnotes-{{ field.name }}">
+                                        <strong>{{ field.label }}</strong>
+                                    </label>
+                                    {% if field.type == "boolean" %}
+                                        <input id="lawsnotes-{{ field.name }}"
+                                               type="checkbox"
+                                               name="{{ field.name }}"
+                                               value="on"
+                                               {% if field.value %}checked{% endif %}>
+                                    {% elif field.type == "text" %}
+                                        <textarea id="lawsnotes-{{ field.name }}"
+                                                  name="{{ field.name }}"
+                                                  rows="{% if field.name == 'custom_css' or field.name == 'custom_js' %}10{% else %}3{% endif %}"
+                                                  style="width:100%;font-family:Menlo,Consolas,monospace;font-size:0.85em;"
+                                                  {% if field.readonly_in_form %}readonly{% endif %}>{{ field.value }}</textarea>
+                                    {% else %}
+                                        <input id="lawsnotes-{{ field.name }}"
+                                               type="text"
+                                               name="{{ field.name }}"
+                                               value="{{ field.value }}"
+                                               style="width:100%;"
+                                               {% if field.readonly_in_form %}readonly{% endif %}>
+                                    {% endif %}
+                                    {% if field.help %}
+                                        <p style="font-size:0.85em;color:#777;margin:0.25em 0 0 0;">
+                                            {{ field.help }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                            {# Font upload widgets, only inside the typography_upload section #}
+                            {% if section.id == "typography_upload" %}
+                                <hr>
+                                <p style="font-size:0.9em;">
+                                    Upload a woff2/woff/ttf/otf font file. After saving,
+                                    the URL field above auto-fills with the served path —
+                                    set the matching family name and reference it from
+                                    the Body / Heading font-family fields in the
+                                    Typography section.
+                                </p>
+                                {% for n in "123" %}
+                                    <div class="lawsnotes-field">
+                                        <label for="lawsnotes-uploaded_font_{{ n }}_file">
+                                            <strong>Upload font #{{ n }}</strong>
+                                        </label>
+                                        <input id="lawsnotes-uploaded_font_{{ n }}_file"
+                                               type="file"
+                                               name="uploaded_font_{{ n }}_file"
+                                               accept=".woff2,.woff,.ttf,.otf,.eot">
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </fieldset>
+                        {% endfor %}
+
+                        <div style="margin-top:1.5em;">
+                            <button type="submit" class="button">Save settings</button>
+                            <a class="button secondary"
+                               href="{% url 'core_plugin_list' %}">Back to plugins</a>
+                        </div>
+                    </form>
+
+                    <hr>
+                    <details style="margin-top:1.5em;">
+                        <summary><strong>Custom JS — what's available?</strong></summary>
+                        <div style="font-size:0.9em;line-height:1.5;">
+                            <p>The Custom JavaScript snippet runs after lawsnotes.js
+                               has finished bootstrapping. The following globals
+                               are available:</p>
+                            <ul>
+                                <li><code>window.lawsnotesSettings</code> —
+                                    plain-object snapshot of the runtime
+                                    settings (sidenoteBreakpoint, sidenoteWidth,
+                                    showDropCaps, hideCiteDropdown,
+                                    hideEndnoteListWhenSidenotes, logoUrl).</li>
+                                <li><code>window.lawsnotesJournalName</code> —
+                                    string with the current journal's display name.</li>
+                                <li><code>window.lawsnotesApiUrl</code> —
+                                    URL of the card-metadata JSON endpoint
+                                    (path-mode aware).</li>
+                                <li><code>window.lawsnotesShowTooltipForMarker(a)</code>
+                                    — open a footnote tooltip programmatically.</li>
+                                <li><code>window.lawsnotesOnReady(fn)</code> —
+                                    register a callback that runs once lawsnotes.js
+                                    is fully bootstrapped, with a stable API
+                                    surface object: <code>{settings,
+                                    showTooltipForMarker, buildSidenotes,
+                                    teardownSidenotes, reflow}</code>.</li>
+                            </ul>
+                            <p>Errors in the snippet are caught and logged to the
+                               browser console (look for <code>[lawsnotes custom_js]</code>);
+                               a broken patch never breaks the page.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.lawsnotes-section {
+    border: 1px solid #b9cdc4;
+    border-radius: 3px;
+    padding: 1em 1.25em;
+    margin: 1em 0;
+}
+.lawsnotes-section legend {
+    padding: 0 0.5em;
+    font-weight: bold;
+    color: #113B3A;
+}
+.lawsnotes-field {
+    margin: 0.75em 0 1em 0;
+}
+.lawsnotes-field input[type="text"],
+.lawsnotes-field textarea {
+    background: #fff;
+    border: 1px solid #b9cdc4;
+    padding: 0.4em 0.6em;
+    border-radius: 2px;
+}
+</style>
+{% endblock body %}

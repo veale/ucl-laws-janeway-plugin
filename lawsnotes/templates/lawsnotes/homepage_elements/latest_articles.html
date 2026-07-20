@@ -1,0 +1,22 @@
+{% load i18n %}
+{% if lawsnotes_latest_articles %}
+<section class="lawsnotes-latest" aria-labelledby="lawsnotes-latest-heading">
+    <h2 id="lawsnotes-latest-heading">{% trans "Latest articles" %}</h2>
+    <ul class="lawsnotes-latest-list">
+    {% for article in lawsnotes_latest_articles %}
+        <li class="lawsnotes-latest-item">
+            <a class="lawsnotes-latest-link" href="{{ article.local_url }}">{{ article.title|safe }}</a>
+            <span class="lawsnotes-latest-meta">
+                {% for fa in article.frozenauthor_set.all %}{% if forloop.counter > 1 %}{% if forloop.last %} &amp; {% else %}, {% endif %}{% endif %}{% if fa.first_name %}{{ fa.first_name }} {% endif %}{{ fa.last_name }}{% endfor %}{% if article.date_published %} · {{ article.date_published|date:"j F Y" }}{% endif %}
+            </span>
+            {% if article.abstract %}
+                <p class="lawsnotes-latest-abstract">{{ article.abstract|striptags|truncatechars:280 }}</p>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+    <p class="lawsnotes-latest-more">
+        <a href="{% url 'journal_articles' %}">{% trans "Browse all articles" %} →</a>
+    </p>
+</section>
+{% endif %}

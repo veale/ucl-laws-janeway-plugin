@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Agent / assistant tooling and notes
+.claude/
+.claude*/
+CLAUDE.md
+claude.md
+AGENTS.md
+.agent/
+.aider*
+.cursor/
+.cursorrules
+.github/copilot-instructions.md
+.continue/
+.windsurf/
+.codeium/
+*.prompt
+*.prompts.md
+scratchpad/
+scratch/
+notes/
+NOTES.md
+TODO.md
+PLAN.md
+DESIGN.md
+
+# Working material: drafts, inspiration, references not shipped
+inspiration/
+reference/
+drafts/
+wip/
+_unused/
+old/
+
+# Test and build output
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+.pytest_cache/
+.tox/
+.mypy_cache/
+.ruff_cache/
+test-output/
+screenshots/
+*.log
+
+# Janeway host artefacts (this repo is the plugin only).
+# Root-anchored: the plugin's own lawsnotes/static/ must stay tracked.
+/janeway/
+/src/
+/db/
+/media/
+/static/
+/collected-static/
+*.sqlite3
+local_settings.py
+host_settings.py
+docker-compose*.yml
+
+# Demo and sample content
+demo/
+samples/
+*.jats.xml
+
+# Editor and OS
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp
+*~
