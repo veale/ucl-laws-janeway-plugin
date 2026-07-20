@@ -13,6 +13,9 @@ falls back to hover/tap popovers when the viewport is too narrow for a margin.
 (PS: The plugin is named `lawsnotes` internally, because Janeway imports a plugin
 directory as a Python module and hyphens are not valid in module names.)
 
+<img width="1913" height="760" alt="Screenshot 2026-07-20 at 16 45 30" src="https://github.com/user-attachments/assets/1e923f7b-3a16-40c1-b872-eaf3dfb34940" />
+
+
 ## What it does
 
 Sidenotes: Each footnote is cloned into an `<aside>` positioned beside its
