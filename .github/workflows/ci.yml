@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Janeway supports a range of Python versions; the plugin should
+        # parse cleanly on all of them.
+        python-version: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Byte-compile
+        # There is no build artifact; this only proves every module parses.
+        run: python -m compileall -q lawsnotes scripts
+
+      - name: Lint
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check --output-format=github
+          src: lawsnotes scripts
+
+  integrity:
+    name: Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Check asset, template and hook references
+        run: python scripts/check_integrity.py
+
+  assets:
+    name: Static assets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: JavaScript syntax
+        run: node --check lawsnotes/static/lawsnotes/lawsnotes.js
+
+      # No CSS linter here on purpose. Value-level validators reject
+      # legitimate vendor-prefixed declarations this stylesheet needs, and
+      # parse-only checks catch nothing, because CSS parsing is error-
+      # tolerant by specification: a truncated rule recovers silently. The
+      # checks that do find real CSS defects -- unresolvable asset URLs and
+      # custom properties nothing reads -- live in the integrity job.
+
+  templates:
+    name: Django templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Django
+        # Janeway is not installed here, so the plugin cannot be imported.
+        # Django alone is enough to prove the templates parse -- a broken
+        # {% %} tag otherwise only surfaces when the page is first rendered.
+        run: pip install --quiet "Django>=4.2,<5"
+
+      - name: Compile templates
+        run: |
+          python - <<'PY'
+          import pathlib, sys
+          import django
+          from django.conf import settings
+
+          settings.configure(
+              TEMPLATES=[{
+                  "BACKEND": "django.template.backends.django.DjangoTemplates",
+                  "DIRS": ["lawsnotes/templates"],
+                  "APP_DIRS": False,
+                  "OPTIONS": {"builtins": ["django.templatetags.static"]},
+              }],
+              INSTALLED_APPS=["django.contrib.contenttypes", "django.contrib.auth"],
+          )
+          django.setup()
+
+          from django.template.loader import get_template
+          from django.template import TemplateSyntaxError
+
+          root = pathlib.Path("lawsnotes/templates")
+          failed = False
+          for path in sorted(root.rglob("*.html")):
+              name = str(path.relative_to(root))
+              try:
+                  get_template(name)
+              except TemplateSyntaxError as exc:
+                  print(f"::error file={path}::{exc}")
+                  failed = True
+              except Exception as exc:
+                  # Unresolved {% url %} names and Janeway-specific tags are
+                  # expected here: those libraries are not installed. Only
+                  # genuine syntax errors should fail the build.
+                  print(f"note: {name}: {type(exc).__name__}: {exc}")
+              else:
+                  print(f"ok: {name}")
+          sys.exit(1 if failed else 0)
+          PY

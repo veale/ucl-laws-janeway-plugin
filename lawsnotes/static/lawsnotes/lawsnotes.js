@@ -110,7 +110,7 @@
     if (!markers.length) return;
 
     layer = document.createElement("div");
-    layer.className = "lawnotes-sidenote-layer";
+    layer.className = "lawsnotes-sidenote-layer";
     document.body.appendChild(layer);
 
     var idx = 0;
@@ -122,9 +122,9 @@
 
       var side = idx % 2 === 0 ? "right" : "left";
       var aside = document.createElement("aside");
-      aside.className = "lawnotes-sidenote lawnotes-sidenote--" + side;
+      aside.className = "lawsnotes-sidenote lawsnotes-sidenote--" + side;
       aside.setAttribute("role", "doc-footnote");
-      aside.id = "lawnotes-sn-" + idx;
+      aside.id = "lawsnotes-sn-" + idx;
 
       // Number lives INSIDE the body so the body can be display:block.
       // A block body inherits the aside's 220px width and gives the
@@ -134,10 +134,10 @@
       // .body was display:inline, the line box was unbounded and URLs
       // overflowed the aside.
       var body = document.createElement("div");
-      body.className = "lawnotes-sidenote-body";
+      body.className = "lawsnotes-sidenote-body";
 
       var num = document.createElement("span");
-      num.className = "lawnotes-sidenote-number";
+      num.className = "lawsnotes-sidenote-number";
       num.textContent = (marker.textContent || "").trim() || (idx + 1);
       body.appendChild(num);
 
@@ -147,7 +147,7 @@
 
       marker.dataset.lawnotesIdx = idx;
       aside.dataset.lawnotesIdx = idx;
-      marker.classList.add("lawnotes-has-sidenote");
+      marker.classList.add("lawsnotes-has-sidenote");
 
       // Click handling is centralised in suppressFootnoteJump (capture
       // phase, document-level), which silences OLH's jQuery scroll
@@ -178,7 +178,7 @@
       return;
     }
 
-    document.body.classList.add("lawnotes-sidenotes-active");
+    document.body.classList.add("lawsnotes-sidenotes-active");
     addUrlBreakHints();      // hint on the freshly-cloned URLs
     foldLongNotes();
     layout();
@@ -191,13 +191,13 @@
     notes.forEach(function (n) {
       n.marker.removeEventListener("mouseenter", highlightPair);
       n.marker.removeEventListener("mouseleave", clearPair);
-      n.marker.classList.remove("lawnotes-has-sidenote");
+      n.marker.classList.remove("lawsnotes-has-sidenote");
       delete n.marker.dataset.lawnotesIdx;
     });
     if (layer) layer.remove();
     layer = null;
     notes = [];
-    document.body.classList.remove("lawnotes-sidenotes-active");
+    document.body.classList.remove("lawsnotes-sidenotes-active");
     sidenotesActive = false;
     window.removeEventListener("resize", onResize);
   }
@@ -207,15 +207,15 @@
       n.aside.style.maxHeight = "none";
       var h = n.aside.offsetHeight;
       if (h <= FOLD_HEIGHT) return;
-      n.aside.classList.add("lawnotes-sidenote--folded");
+      n.aside.classList.add("lawsnotes-sidenote--folded");
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "lawnotes-sidenote-expand";
+      btn.className = "lawsnotes-sidenote-expand";
       btn.textContent = "more";
       btn.setAttribute("aria-expanded", "false");
       btn.setAttribute("aria-controls", n.aside.id);
       btn.addEventListener("click", function () {
-        var expanded = n.aside.classList.toggle("lawnotes-sidenote--expanded");
+        var expanded = n.aside.classList.toggle("lawsnotes-sidenote--expanded");
         btn.textContent = expanded ? "less" : "more";
         btn.setAttribute("aria-expanded", String(expanded));
         layout();
@@ -279,7 +279,7 @@
     e.preventDefault();
     var idx = e.currentTarget.dataset.lawnotesIdx;
     if (idx == null) return;
-    var aside = document.getElementById("lawnotes-sn-" + idx);
+    var aside = document.getElementById("lawsnotes-sn-" + idx);
     if (!aside) return;
     var rect = aside.getBoundingClientRect();
     var miniBar = document.querySelector(".mini-bar");
@@ -297,8 +297,8 @@
       var target = window.pageYOffset + rect.top - stickyTop - 64;
       window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
     }
-    aside.classList.add("lawnotes-sidenote--flash");
-    setTimeout(function () { aside.classList.remove("lawnotes-sidenote--flash"); }, 900);
+    aside.classList.add("lawsnotes-sidenote--flash");
+    setTimeout(function () { aside.classList.remove("lawsnotes-sidenote--flash"); }, 900);
   }
 
   function scrollToMarkerFromSidenote(e) {
@@ -325,8 +325,8 @@
     var topOffset = (miniBar ? miniBar.offsetHeight : 0) + 24;
     var target = window.pageYOffset + rect.top - topOffset;
     window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
-    pair.marker.classList.add("lawnotes-hover");
-    setTimeout(function () { pair.marker.classList.remove("lawnotes-hover"); }, 900);
+    pair.marker.classList.add("lawsnotes-hover");
+    setTimeout(function () { pair.marker.classList.remove("lawsnotes-hover"); }, 900);
   }
 
   function highlightPairFromAside(e) {
@@ -334,32 +334,32 @@
     if (idx == null) return;
     var pair = notes[parseInt(idx, 10)];
     if (!pair) return;
-    e.currentTarget.classList.add("lawnotes-hover");
-    if (pair.marker) pair.marker.classList.add("lawnotes-hover");
+    e.currentTarget.classList.add("lawsnotes-hover");
+    if (pair.marker) pair.marker.classList.add("lawsnotes-hover");
   }
   function clearPairFromAside(e) {
     var idx = e.currentTarget.dataset.lawnotesIdx;
     if (idx == null) return;
     var pair = notes[parseInt(idx, 10)];
     if (!pair) return;
-    e.currentTarget.classList.remove("lawnotes-hover");
-    if (pair.marker) pair.marker.classList.remove("lawnotes-hover");
+    e.currentTarget.classList.remove("lawsnotes-hover");
+    if (pair.marker) pair.marker.classList.remove("lawsnotes-hover");
   }
 
   function highlightPair(e) {
     var idx = e.currentTarget.dataset.lawnotesIdx;
     if (idx == null) return;
-    var aside = document.getElementById("lawnotes-sn-" + idx);
-    e.currentTarget.classList.add("lawnotes-hover");
-    if (aside) aside.classList.add("lawnotes-hover");
+    var aside = document.getElementById("lawsnotes-sn-" + idx);
+    e.currentTarget.classList.add("lawsnotes-hover");
+    if (aside) aside.classList.add("lawsnotes-hover");
   }
 
   function clearPair(e) {
     var idx = e.currentTarget.dataset.lawnotesIdx;
     if (idx == null) return;
-    var aside = document.getElementById("lawnotes-sn-" + idx);
-    e.currentTarget.classList.remove("lawnotes-hover");
-    if (aside) aside.classList.remove("lawnotes-hover");
+    var aside = document.getElementById("lawsnotes-sn-" + idx);
+    e.currentTarget.classList.remove("lawsnotes-hover");
+    if (aside) aside.classList.remove("lawsnotes-hover");
   }
 
   /* ============================================================
@@ -373,8 +373,8 @@
     if (!markers.length) return;
 
     var tooltip = document.createElement("div");
-    tooltip.id = "lawnotes-tooltip";
-    tooltip.className = "lawnotes-tooltip";
+    tooltip.id = "lawsnotes-tooltip";
+    tooltip.className = "lawsnotes-tooltip";
     tooltip.setAttribute("role", "tooltip");
     tooltip.setAttribute("aria-hidden", "true");
     document.body.appendChild(tooltip);
@@ -386,7 +386,7 @@
 
     function show(marker, opts) {
       // When sidenotes are active they replace the tooltip entirely.
-      if (document.body.classList.contains("lawnotes-sidenotes-active")) return;
+      if (document.body.classList.contains("lawsnotes-sidenotes-active")) return;
       opts = opts || {};
       var href = marker.dataset.lawsnotesHref || marker.getAttribute("href") || "";
       if (!href || href.charAt(0) !== "#") return;
@@ -397,13 +397,13 @@
 
       tooltip.innerHTML = "";
       var num = document.createElement("span");
-      num.className = "lawnotes-tooltip-num";
+      num.className = "lawsnotes-tooltip-num";
       num.textContent = (marker.textContent || "").trim();
       tooltip.appendChild(num);
       var content = noteContent(target);
       while (content.firstChild) tooltip.appendChild(content.firstChild);
 
-      tooltip.classList.add("lawnotes-tooltip--visible");
+      tooltip.classList.add("lawsnotes-tooltip--visible");
       tooltip.setAttribute("aria-hidden", "false");
       if (currentMarker && currentMarker !== marker) {
         currentMarker.removeAttribute("aria-describedby");
@@ -436,7 +436,7 @@
     }
 
     function hide() {
-      tooltip.classList.remove("lawnotes-tooltip--visible");
+      tooltip.classList.remove("lawsnotes-tooltip--visible");
       tooltip.setAttribute("aria-hidden", "true");
       if (currentMarker) {
         currentMarker.removeAttribute("aria-describedby");
@@ -475,7 +475,7 @@
 
     // Expose for the capture-phase click handler.
     window.lawsnotesShowTooltipForMarker = function (marker) {
-      if (document.body.classList.contains("lawnotes-sidenotes-active")) return;
+      if (document.body.classList.contains("lawsnotes-sidenotes-active")) return;
       if (currentMarker === marker && pinned) { hide(); return; }
       cancelHide();
       show(marker, { pinned: true });
@@ -503,7 +503,7 @@
     });
 
     var reposition = function () {
-      if (currentMarker && tooltip.classList.contains("lawnotes-tooltip--visible")) {
+      if (currentMarker && tooltip.classList.contains("lawsnotes-tooltip--visible")) {
         position(currentMarker);
       }
     };
@@ -523,7 +523,7 @@
   function relocateFileLinks() {
     var articleEl = document.getElementById("article");
     if (!articleEl) return;
-    if ($(".lawnotes-files", articleEl)) return;
+    if ($(".lawsnotes-files", articleEl)) return;
 
     var listSource = null;
     var sidebarHeadings = $$("section.side-info .section h2");
@@ -540,7 +540,7 @@
     if (!listSource) return;
 
     var wrap = document.createElement("div");
-    wrap.className = "lawnotes-files";
+    wrap.className = "lawsnotes-files";
     var clone = listSource.cloneNode(true);
     // Rewrite link text: drop icons + screen-reader spans (which throw
     // off the underline baseline because they're inline boxes inside
@@ -642,7 +642,7 @@
   function buildArticleDetails() {
     var articleEl = document.getElementById("article");
     if (!articleEl) return;
-    if ($(".lawnotes-details", articleEl)) return;
+    if ($(".lawsnotes-details", articleEl)) return;
 
     // Lead with summary metrics + dates + license.
     var pairs = harvestSummary();
@@ -724,7 +724,7 @@
     if (!pairs.length) return;
 
     var details = document.createElement("details");
-    details.className = "lawnotes-details";
+    details.className = "lawsnotes-details";
     var summary = document.createElement("summary");
     var labelSpan = document.createElement("span");
     labelSpan.className = "lawsnotes-summary-label";
@@ -733,16 +733,16 @@
     details.appendChild(summary);
 
     var inner = document.createElement("div");
-    inner.className = "lawnotes-details-body";
+    inner.className = "lawsnotes-details-body";
     pairs.forEach(function (p, i) {
       if (i > 0) {
         var sep = document.createElement("span");
-        sep.className = "lawnotes-details-sep";
+        sep.className = "lawsnotes-details-sep";
         sep.textContent = "·";
         inner.appendChild(sep);
       }
       var span = document.createElement("span");
-      span.className = "lawnotes-details-item";
+      span.className = "lawsnotes-details-item";
       if (p.label) {
         var lab = document.createElement("strong");
         lab.textContent = p.label + ": ";
@@ -756,7 +756,7 @@
     details.appendChild(inner);
 
     // Place after the files block, or under the abstract.
-    var anchor = $(".lawnotes-files", articleEl);
+    var anchor = $(".lawsnotes-files", articleEl);
     if (anchor && anchor.parentNode) {
       anchor.parentNode.insertBefore(details, anchor.nextSibling);
     } else {
@@ -1294,7 +1294,7 @@
      emits absolute or relative URLs. */
   function appendSeeFullVolume() {
     if (!document.body.classList.contains("lawsnotes-page-article")) return;
-    var ul = document.querySelector(".lawnotes-files ul");
+    var ul = document.querySelector(".lawsnotes-files ul");
     if (!ul) return;
     if (ul.querySelector(".lawsnotes-see-volume")) return;
     var meta = _extractArticleMeta();
@@ -1386,7 +1386,7 @@
   }
   function addUrlBreakHints() {
     _addWbrToUrls(document.getElementById("main_article"));
-    $$(".lawnotes-sidenote").forEach(_addWbrToUrls);
+    $$(".lawsnotes-sidenote").forEach(_addWbrToUrls);
   }
 
   /* Bridge for the cite-style submenu (Harvard / Vancouver / APA)
@@ -1512,21 +1512,21 @@
       // Defer until after toggleDyslexia has finished mutating the DOM.
       setTimeout(function () {
         var on = !!document.querySelector("#article .dyslexia-friendly");
-        document.body.classList.toggle("lawnotes-dyslexia", on);
+        document.body.classList.toggle("lawsnotes-dyslexia", on);
       }, 0);
     });
   }
 
   /* OLH's resizeText() (static/common/js/text_readability.js) walks only
      descendants of #article. Sidenotes are cloned into a
-     .lawnotes-sidenote-layer appended to <body>, and the rollover tooltip
-     into a .lawnotes-tooltip likewise outside #article, so A+/A- never
+     .lawsnotes-sidenote-layer appended to <body>, and the rollover tooltip
+     into a .lawsnotes-tooltip likewise outside #article, so A+/A- never
      touch them. Wrap resizeText to apply the same multiplier to those
      overlays after the original call returns, then reflow sidenote
      positions (their heights changed). */
   /* Why a CSS variable instead of per-element px walking:
      OLH's algorithm scales by ±20% per click. Applied naively to every
-     descendant of .lawnotes-sidenote-layer it compounds badly, because
+     descendant of .lawsnotes-sidenote-layer it compounds badly, because
      sidenote children use em-based font-sizes -- setting the parent's
      font-size to 1.2x already grows the child via inheritance, and
      explicitly multiplying the child's getComputedStyle value by 1.2
@@ -1581,11 +1581,11 @@
         node.id === "article_how_to_cite" ||
         node.classList.contains("summary") ||
         node.classList.contains("callout") ||
-        node.classList.contains("lawnotes-files") ||
-        node.classList.contains("lawnotes-details")
+        node.classList.contains("lawsnotes-files") ||
+        node.classList.contains("lawsnotes-details")
       );
       if (stop) break;
-      if (node.tagName === "P") node.classList.add("lawnotes-abstract");
+      if (node.tagName === "P") node.classList.add("lawsnotes-abstract");
       node = node.nextElementSibling;
     }
   }
@@ -1637,7 +1637,7 @@
       lastHandled = { marker: a, t: now };
       var idx = a.dataset.lawnotesIdx;
       if (sidenotesActive && idx != null) {
-        var aside = document.getElementById("lawnotes-sn-" + idx);
+        var aside = document.getElementById("lawsnotes-sn-" + idx);
         if (aside) scrollAsideIntoView(aside);
       } else if (window.lawsnotesShowTooltipForMarker) {
         window.lawsnotesShowTooltipForMarker(a);
@@ -1667,9 +1667,9 @@
       var target = window.pageYOffset + rect.top - stickyTop - 64;
       window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
     }
-    aside.classList.add("lawnotes-sidenote--flash");
+    aside.classList.add("lawsnotes-sidenote--flash");
     setTimeout(function () {
-      aside.classList.remove("lawnotes-sidenote--flash");
+      aside.classList.remove("lawsnotes-sidenote--flash");
     }, 900);
   }
 

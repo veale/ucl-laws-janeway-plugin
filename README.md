@@ -155,6 +155,28 @@ lawsnotes/
 └── templates/lawsnotes/ manage, configure, and homepage element templates
 ```
 
+## Development
+
+Nothing to build, happily. The plugin is interpreted in place by the host's
+Janeway and the static assets are served as they are, so there is no compile
+step to get wrong.
+
+CI runs on push and pull request: it byte-compiles and lints the Python across
+three versions, syntax-checks the JavaScript, compiles the Django templates,
+and runs `scripts/check_integrity.py`.
+
+That last one earns its keep because this plugin's characteristic failure mode
+is silence rather than a stack trace. Janeway skips a plugin whose
+`PLUGIN_NAME` disagrees with its directory name and says nothing useful about
+it. A stylesheet pointing at a deleted asset just quietly renders without it.
+Worst of all, a setting whose CSS variable no rule reads will render a nicely
+labelled control on the manage page that does precisely nothing when an editor
+changes it — which is how four of them got shipped and then caught. The script
+checks each of those, plus that every hook in the registry names a function
+that actually exists.
+
+Run it yourself with `python3 scripts/check_integrity.py`.
+
 ## Uninstalling
 
 ```bash

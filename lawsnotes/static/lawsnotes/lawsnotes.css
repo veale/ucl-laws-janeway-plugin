@@ -91,11 +91,11 @@ section.no-padding.meta a,
 .olh-banner-heading,
 .olh-banner-heading h1,
 .olh-banner-heading p,
-.lawnotes-sidenote,
-.lawnotes-sidenote-body,
-.lawnotes-tooltip,
-.lawnotes-files,
-.lawnotes-details,
+.lawsnotes-sidenote,
+.lawsnotes-sidenote-body,
+.lawsnotes-tooltip,
+.lawsnotes-files,
+.lawsnotes-details,
 #article_how_to_cite {
     font-family: var(--lawsnotes-font-body, 'Newsreader', Georgia, 'Times New Roman', serif) !important;
     font-optical-sizing: auto;
@@ -112,11 +112,11 @@ section.no-padding.meta a,
 #main_article li,
 #main_article ol.footnotes,
 #main_article ol.footnotes li,
-.lawnotes-sidenote,
-.lawnotes-sidenote-body,
-.lawnotes-tooltip,
-.lawnotes-files,
-.lawnotes-details,
+.lawsnotes-sidenote,
+.lawsnotes-sidenote-body,
+.lawsnotes-tooltip,
+.lawsnotes-files,
+.lawsnotes-details,
 #article_how_to_cite,
 #article_how_to_cite #cite-content {
     font-weight: 460;
@@ -126,10 +126,15 @@ section.no-padding.meta a,
 .olh-banner-heading h1,
 #article_how_to_cite > h2 {
     font-weight: 650;
+    /* Falls back to the body stack, so leaving the Heading font-family
+       setting blank keeps headings matching body text. */
+    font-family: var(--lawsnotes-font-heading,
+                     var(--lawsnotes-font-body,
+                         'Newsreader', Georgia, 'Times New Roman', serif));
 }
-.lawnotes-sidenote-number,
-.lawnotes-tooltip-num,
-.lawnotes-details-item strong {
+.lawsnotes-sidenote-number,
+.lawsnotes-tooltip-num,
+.lawsnotes-details-item strong {
     font-weight: 700;
 }
 
@@ -143,12 +148,12 @@ section.no-padding.meta a,
 #article .dyslexia-friendly,
 #article.dyslexia-friendly,
 #article .dyslexia-friendly *,
-body.lawnotes-dyslexia .lawnotes-sidenote,
-body.lawnotes-dyslexia .lawnotes-sidenote *,
-body.lawnotes-dyslexia .lawnotes-tooltip,
-body.lawnotes-dyslexia .lawnotes-tooltip *,
-body.lawnotes-dyslexia .olh-banner-heading,
-body.lawnotes-dyslexia .olh-banner-heading * {
+body.lawsnotes-dyslexia .lawsnotes-sidenote,
+body.lawsnotes-dyslexia .lawsnotes-sidenote *,
+body.lawsnotes-dyslexia .lawsnotes-tooltip,
+body.lawsnotes-dyslexia .lawsnotes-tooltip *,
+body.lawsnotes-dyslexia .olh-banner-heading,
+body.lawsnotes-dyslexia .olh-banner-heading * {
     font-family: Verdana, sans-serif !important;
     font-weight: normal !important;
     font-style: normal !important;
@@ -159,17 +164,17 @@ body.lawnotes-dyslexia .olh-banner-heading * {
 #article h4.dyslexia-friendly,
 #article h5.dyslexia-friendly,
 #article h6.dyslexia-friendly,
-body.lawnotes-dyslexia .olh-banner-heading h1,
+body.lawsnotes-dyslexia .olh-banner-heading h1,
 #article_how_to_cite.dyslexia-friendly > h2 {
     font-weight: bold !important;
 }
 
 /* Italic abstract. The OLH template emits plain <p>s directly under
    #article between the Abstract <h3> and the next section -- no class
-   to target -- so sidenotes.js tags them with .lawnotes-abstract. */
-.lawnotes-abstract {
+   to target -- so sidenotes.js tags them with .lawsnotes-abstract. */
+.lawsnotes-abstract {
     font-style: italic;
-    color: #2a2a2a;
+    color: var(--lawsnotes-color-text, #2a2a2a);
 }
 
 /* lawnotes / sidenotes.css
@@ -215,7 +220,7 @@ body.lawnotes-dyslexia .olh-banner-heading h1,
 body section:has(> section#content) {
     max-width: var(--lawsnotes-paper-max-width, 1280px);
     margin: 1rem auto 3rem !important;
-    background: #ffffff !important;
+    background: var(--lawsnotes-color-paper, #ffffff) !important;
     padding: 2rem 0 3rem !important;
     box-shadow:
         0 24px 48px -16px rgba(17, 59, 58, 0.12),
@@ -434,7 +439,7 @@ section.no-padding.meta.show-for-small-only a svg {
 
 /* Right sidebar: hidden permanently. Its content is flattened into a
    collapsible "More article details" block under the abstract by
-   sidenotes.js (.lawnotes-details), and DOI is moved into How-to-cite. */
+   sidenotes.js (.lawsnotes-details), and DOI is moved into How-to-cite. */
 section.side-info { display: none !important; }
 
 /* Drop the Foundation column widths so the article body can centre itself
@@ -512,17 +517,17 @@ section.side-info { display: none !important; }
 #article a:visited,
 #main_article a,
 #main_article a:visited,
-.lawnotes-sidenote a,
-.lawnotes-tooltip a,
-.lawnotes-files a,
-.lawnotes-details-body a,
+.lawsnotes-sidenote a,
+.lawsnotes-tooltip a,
+.lawsnotes-files a,
+.lawsnotes-details-body a,
 #article_how_to_cite a {
     color: var(--lawsnotes-color-primary, #113B3A) !important;
 }
 #article a:hover,
 #main_article a:hover,
-.lawnotes-sidenote a:hover,
-.lawnotes-tooltip a:hover {
+.lawsnotes-sidenote a:hover,
+.lawsnotes-tooltip a:hover {
     color: var(--lawsnotes-color-primary, #113B3A) !important;
 }
 
@@ -549,13 +554,13 @@ section.no-padding.meta a:hover {
    the download links above, with the arrow stacked below the label.
    Body opens below the summary on click (default <details>
    behaviour). */
-.lawnotes-details {
+.lawsnotes-details {
     margin: 0.4em 0 1.4em;
     font-size: 0.92em;
-    color: #555;
+    color: var(--lawsnotes-color-muted, #555);
     text-align: center;
 }
-.lawnotes-details > summary {
+.lawsnotes-details > summary {
     display: inline-block;
     cursor: pointer;
     list-style: none;
@@ -565,15 +570,15 @@ section.no-padding.meta a:hover {
     font-size: 0.88em;
     line-height: 1.2;
 }
-.lawnotes-details > summary::-webkit-details-marker { display: none; }
-.lawnotes-details > summary .lawsnotes-summary-label {
+.lawsnotes-details > summary::-webkit-details-marker { display: none; }
+.lawsnotes-details > summary .lawsnotes-summary-label {
     display: inline-block;
     border-bottom: 1px solid rgba(17, 59, 58, 0.25);
     padding-bottom: 0;
     color: var(--lawsnotes-color-primary, #113B3A);
     text-decoration: none;
 }
-.lawnotes-details > summary::after {
+.lawsnotes-details > summary::after {
     content: "▾";
     display: block;
     text-align: center;
@@ -583,28 +588,28 @@ section.no-padding.meta a:hover {
     color: var(--lawsnotes-color-primary, #113B3A);
     transition: transform 120ms ease;
 }
-.lawnotes-details[open] > summary::after {
+.lawsnotes-details[open] > summary::after {
     transform: rotate(180deg);
 }
-.lawnotes-details > summary:hover .lawsnotes-summary-label {
+.lawsnotes-details > summary:hover .lawsnotes-summary-label {
     border-bottom-color: var(--lawsnotes-color-primary, #113B3A);
 }
-.lawnotes-details-body {
+.lawsnotes-details-body {
     margin-top: 0.6em;
     line-height: 1.6;
 }
-.lawnotes-details-item { display: inline; }
-.lawnotes-details-item strong {
+.lawsnotes-details-item { display: inline; }
+.lawsnotes-details-item strong {
     color: #333;
     font-weight: 600;
 }
-.lawnotes-details-sep {
+.lawsnotes-details-sep {
     color: #bbb;
     margin: 0 0.5em;
 }
-.lawnotes-details-body a { color: var(--lawsnotes-color-primary, #113B3A); }
-.lawnotes-details-body p { display: inline; margin: 0; }
-.lawnotes-details-body ul, .lawnotes-details-body li {
+.lawsnotes-details-body a { color: var(--lawsnotes-color-primary, #113B3A); }
+.lawsnotes-details-body p { display: inline; margin: 0; }
+.lawsnotes-details-body ul, .lawsnotes-details-body li {
     display: inline; list-style: none; margin: 0; padding: 0;
 }
 
@@ -612,7 +617,7 @@ section.no-padding.meta a:hover {
    Centred horizontally with a 2px rule (matching the sidenote
    vertical borders in colour and weight) flanking the centred
    link group on the far left and far right. */
-.lawnotes-files {
+.lawsnotes-files {
     margin: 0.6em 0 1.4em;
     padding: 0;
     font-size: 0.88em;
@@ -620,24 +625,24 @@ section.no-padding.meta a:hover {
     align-items: center;
     gap: 1em;
 }
-.lawnotes-files::before,
-.lawnotes-files::after {
+.lawsnotes-files::before,
+.lawsnotes-files::after {
     content: "";
     flex: 1 1 0;
     min-width: 1.5em;
     height: 2px;
     background: rgba(0, 0, 0, 0.35);
 }
-.lawnotes-files ul {
+.lawsnotes-files ul {
     flex: 0 0 auto;
     list-style: none;
     margin: 0;
     padding: 0;
     text-align: center;
 }
-.lawnotes-files li { display: inline; margin-right: 1em; }
-.lawnotes-files li:last-child { margin-right: 0; }
-.lawnotes-files a {
+.lawsnotes-files li { display: inline; margin-right: 1em; }
+.lawsnotes-files li:last-child { margin-right: 0; }
+.lawsnotes-files a {
     color: var(--lawsnotes-color-primary, #113B3A) !important;
     /* text-decoration must win against Foundation or press-override CSS that sets
        `a[target="_blank"] { text-decoration: underline }`. Without
@@ -652,12 +657,12 @@ section.no-padding.meta a:hover {
     display: inline-block;
     line-height: 1.2;
 }
-.lawnotes-files a:hover {
+.lawsnotes-files a:hover {
     border-bottom-color: var(--lawsnotes-color-primary, #113B3A) !important;
 }
 
 /* Hide OLH's small-only files block (`<div class="show-for-small-only">`
-   right under the abstract) -- our injected .lawnotes-files block
+   right under the abstract) -- our injected .lawsnotes-files block
    already covers every viewport, so on mobile the original would
    render underneath ours as a duplicate "Files: XML / XML". */
 #article > div.show-for-small-only { display: none !important; }
@@ -723,7 +728,7 @@ a.xref-fn sup {
 }
 a.xref-fn:hover sup,
 a.xref-fn:focus sup,
-a.xref-fn.lawnotes-hover sup {
+a.xref-fn.lawsnotes-hover sup {
     background: rgba(17, 59, 58, 0.18);
     outline: none;
 }
@@ -732,14 +737,14 @@ a.xref-fn.lawnotes-hover sup {
    3. SIDENOTE OVERLAY LAYER (≥1280px)
    ============================================================ */
 
-.lawnotes-sidenote-layer {
+.lawsnotes-sidenote-layer {
     position: absolute;
     top: 0; left: 0; right: 0;
     pointer-events: none;
     z-index: 10;
 }
 
-.lawnotes-sidenote {
+.lawsnotes-sidenote {
     position: absolute;
     pointer-events: auto;
     cursor: pointer;
@@ -767,27 +772,27 @@ a.xref-fn.lawnotes-hover sup {
    does the latter -- it preferentially moves a long token to the next
    line before breaking it. `overflow-wrap: anywhere` alone lets the
    token start mid-line and break only when it hits the edge. */
-.lawnotes-sidenote a { overflow-wrap: anywhere; word-break: normal; }
+.lawsnotes-sidenote a { overflow-wrap: anywhere; word-break: normal; }
 
-.lawnotes-sidenote--right {
+.lawsnotes-sidenote--right {
     padding-left: 0.8em;
     border-left: 2px solid rgba(0, 0, 0, 0.35);
     text-align: left;
 }
-.lawnotes-sidenote--left {
+.lawsnotes-sidenote--left {
     padding-right: 0.8em;
     border-right: 2px solid rgba(0, 0, 0, 0.35);
     text-align: right;
 }
 
-.lawnotes-sidenote-number {
+.lawsnotes-sidenote-number {
     color: var(--lawsnotes-color-primary, #113B3A);
     font-weight: bold;
     font-size: 0.85em;
     vertical-align: super;
     margin-right: 0.3em;
 }
-.lawnotes-sidenote--left .lawnotes-sidenote-number {
+.lawsnotes-sidenote--left .lawsnotes-sidenote-number {
     margin-right: 0;
     margin-left: 0.3em;
 }
@@ -795,28 +800,28 @@ a.xref-fn.lawnotes-hover sup {
 /* Body is a block so its line box is the aside's content width (220px).
    Without this constraint the URL inside an anchor doesn't have anything
    to wrap against and overflow-wrap: anywhere has no effect. */
-.lawnotes-sidenote-body { display: block; }
-.lawnotes-sidenote-body p { display: inline; margin: 0; }
-.lawnotes-sidenote-body p + p { display: block; margin-top: 0.5em; }
-.lawnotes-sidenote a { color: var(--lawsnotes-color-primary, #113B3A); text-decoration: underline; }
+.lawsnotes-sidenote-body { display: block; }
+.lawsnotes-sidenote-body p { display: inline; margin: 0; }
+.lawsnotes-sidenote-body p + p { display: block; margin-top: 0.5em; }
+.lawsnotes-sidenote a { color: var(--lawsnotes-color-primary, #113B3A); text-decoration: underline; }
 
-.lawnotes-sidenote.lawnotes-hover {
+.lawsnotes-sidenote.lawsnotes-hover {
     background: rgba(17, 59, 58, 0.16);
 }
 
 /* Long notes collapse with a "more" toggle (managed by JS). */
-.lawnotes-sidenote--folded {
+.lawsnotes-sidenote--folded {
     max-height: 240px;
     overflow: hidden;
     -webkit-mask-image: linear-gradient(180deg, black 75%, transparent);
             mask-image: linear-gradient(180deg, black 75%, transparent);
 }
-.lawnotes-sidenote--folded.lawnotes-sidenote--expanded {
+.lawsnotes-sidenote--folded.lawsnotes-sidenote--expanded {
     max-height: none;
     -webkit-mask-image: none;
             mask-image: none;
 }
-.lawnotes-sidenote-expand {
+.lawsnotes-sidenote-expand {
     display: block;
     margin-top: 0.4em;
     background: transparent;
@@ -827,10 +832,10 @@ a.xref-fn.lawnotes-hover sup {
     padding: 0;
     text-decoration: underline;
 }
-.lawnotes-sidenote--left .lawnotes-sidenote-expand { margin-left: auto; }
+.lawsnotes-sidenote--left .lawsnotes-sidenote-expand { margin-left: auto; }
 
 /* Brief flash when a marker is clicked while sidenotes are active. */
-.lawnotes-sidenote--flash {
+.lawsnotes-sidenote--flash {
     background: rgba(17, 59, 58, 0.28) !important;
 }
 
@@ -838,7 +843,7 @@ a.xref-fn.lawnotes-hover sup {
    Gated on the absence of `lawsnotes-keep-endnote-list` so editors can
    flip the per-journal `hide_endnote_list_when_sidenotes` setting
    off and have the list reappear. */
-body.lawnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article ol.footnotes {
+body.lawsnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article ol.footnotes {
     display: none;
 }
 
@@ -849,16 +854,16 @@ body.lawnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article o
    spans) don't inherit overflow-wrap reliably across browsers. */
 #main_article ol.footnotes,
 #main_article ol.footnotes *,
-.lawnotes-sidenote,
-.lawnotes-sidenote *,
-.lawnotes-tooltip,
-.lawnotes-tooltip * {
+.lawsnotes-sidenote,
+.lawsnotes-sidenote *,
+.lawsnotes-tooltip,
+.lawsnotes-tooltip * {
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
 }
 #main_article ol.footnotes a,
-.lawnotes-sidenote a,
-.lawnotes-tooltip a {
+.lawsnotes-sidenote a,
+.lawsnotes-tooltip a {
     /* OLH ships `a[target="_blank"] { white-space: nowrap }` in app.css
        which suppresses ALL wrapping in external links -- and word-break /
        overflow-wrap can only modulate how to break, not whether to break.
@@ -886,7 +891,7 @@ body.lawnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article o
    4. TOOLTIP (rollover note)
    ============================================================ */
 
-.lawnotes-tooltip {
+.lawsnotes-tooltip {
     position: absolute;
     top: 0; left: 0;
     z-index: 9999;
@@ -897,7 +902,7 @@ body.lawnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article o
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
     padding: 0.75em 1em;
     font-family: Georgia, "Times New Roman", serif;
-    /* Tracks the same A+/A- bump as sidenotes; see .lawnotes-sidenote. */
+    /* Tracks the same A+/A- bump as sidenotes; see .lawsnotes-sidenote. */
     font-size: calc(0.9em + var(--lawsnotes-overlay-bump, 0pt));
     line-height: 1.5;
     /* Same iOS WebKit text-inflation guard as sidenotes. */
@@ -914,7 +919,7 @@ body.lawnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article o
    to read, anchored to the bottom of the viewport rather than
    crammed next to a 12px-tall marker. */
 @media (max-width: 600px) {
-    .lawnotes-tooltip {
+    .lawsnotes-tooltip {
         position: fixed !important;
         left: 12px !important;
         right: 12px !important;
@@ -929,18 +934,18 @@ body.lawnotes-sidenotes-active:not(.lawsnotes-keep-endnote-list) #main_article o
         box-shadow: 0 -6px 32px rgba(0, 0, 0, 0.25);
     }
 }
-.lawnotes-tooltip a { overflow-wrap: anywhere; word-break: normal; }
-.lawnotes-tooltip--visible {
+.lawsnotes-tooltip a { overflow-wrap: anywhere; word-break: normal; }
+.lawsnotes-tooltip--visible {
     opacity: 1;
     pointer-events: auto;
 }
-.lawnotes-tooltip-num {
+.lawsnotes-tooltip-num {
     color: var(--lawsnotes-color-primary, #113B3A);
     font-weight: bold;
     margin-right: 0.3em;
 }
-.lawnotes-tooltip p { display: inline; margin: 0; }
-.lawnotes-tooltip a { color: var(--lawsnotes-color-primary, #113B3A); }
+.lawsnotes-tooltip p { display: inline; margin: 0; }
+.lawsnotes-tooltip a { color: var(--lawsnotes-color-primary, #113B3A); }
 
 /* ============================================================
    5. NON-ARTICLE PAGES (homepage, articles list, issues, news, etc.)
@@ -1001,7 +1006,7 @@ body.lawsnotes-on:not(.lawsnotes-page-article):not(.lawsnotes-page-manager) #mai
 body.lawsnotes-on.lawsnotes-page-home #main-content {
     max-width: 1080px;
     margin: 1rem auto 3rem !important;
-    background: #ffffff;
+    background: var(--lawsnotes-color-paper, #ffffff);
     padding: 2rem 1.5rem 3rem !important;
     box-shadow:
         0 24px 48px -16px rgba(17, 59, 58, 0.12),
@@ -1107,7 +1112,7 @@ body.lawsnotes-on.lawsnotes-page-articles .accordion-content {
 body.lawsnotes-on.lawsnotes-page-articles .pagination,
 body.lawsnotes-on.lawsnotes-page-articles select,
 body.lawsnotes-on.lawsnotes-page-articles label {
-    color: #555;
+    color: var(--lawsnotes-color-muted, #555);
     font-size: 0.9em;
 }
 /* (older rule for select.input-group-field intentionally removed -- the
@@ -1623,8 +1628,8 @@ body.lawsnotes-on.lawsnotes-page-article #article > h3:first-of-type {
    (citation, files, details, main article) start cleanly below the
    abstract instead of wrapping around the heading's residual height. */
 body.lawsnotes-on.lawsnotes-page-article #article > #article_how_to_cite,
-body.lawsnotes-on.lawsnotes-page-article #article > .lawnotes-files,
-body.lawsnotes-on.lawsnotes-page-article #article > .lawnotes-details,
+body.lawsnotes-on.lawsnotes-page-article #article > .lawsnotes-files,
+body.lawsnotes-on.lawsnotes-page-article #article > .lawsnotes-details,
 body.lawsnotes-on.lawsnotes-page-article #article > .summary,
 body.lawsnotes-on.lawsnotes-page-article #article > #main_article {
     clear: left;
