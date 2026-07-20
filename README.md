@@ -19,8 +19,7 @@ directory as a Python module and hyphens are not valid in module names.)
 ## What it does
 
 Sidenotes: Each footnote is cloned into an `<aside>` positioned beside its
-citing paragraph, alternating right and left down the page. We think this is pretty novel! Long notes fold
-behind a "more" toggle. Below a configurable breakpoint (1280px by default) the
+citing paragraph, alternating right and left down the page. We think this is pretty novel! Long notes push other notes down if required, but you can highlight your note marker and it will highlight the correspodning note, or take you to it thorugh clicking. The alternation also makes it so that long notes are not a problem, as both margins are used. Below a configurable breakpoint (1280px by default) the
 sidenotes are replaced by popovers anchored to the footnote marker, and the
 endnote list at the foot of the article reappears.
 
