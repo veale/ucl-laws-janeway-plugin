@@ -1,52 +1,52 @@
-# ucl-laws-janeway-plugin
+# Lawsnotes — a UCL Laws Janeway plugin for beautiful OA law journals full of beautiful scholarship by beautiful people
 
-A Janeway plugin that renders one journal as a law journal: a single-column
-reading layout, a serif typeface, and Tufte-style sidenotes generated from the
+A [Janeway](https://github.com/openlibhums/janeway) plugin produced by UCL Laws that renders one journal as a law journal: a single-column
+reading layout, a serif typeface, and sidenotes (rather than footnotes) generated from the
 footnotes Janeway's JATS pipeline already produces.
 
-Law journals carry heavy footnote apparatus. Janeway's stock output puts every
+Law journals carry heavy footnote apparatus. Too heavy, some might say. Janeway's stock output puts every
 footnote in a numbered list at the foot of the article, so reading a densely
 annotated piece means jumping to the bottom and back for each note. This plugin
 moves those notes into the page margin beside the text that cites them, and
 falls back to hover/tap popovers when the viewport is too narrow for a margin.
 
-The plugin is named `lawsnotes` internally, because Janeway imports a plugin
-directory as a Python module and hyphens are not valid in module names.
+(PS: The plugin is named `lawsnotes` internally, because Janeway imports a plugin
+directory as a Python module and hyphens are not valid in module names.)
 
 ## What it does
 
-Sidenotes. Each footnote is cloned into an `<aside>` positioned beside its
-citing paragraph, alternating right and left down the page. Long notes fold
+Sidenotes: Each footnote is cloned into an `<aside>` positioned beside its
+citing paragraph, alternating right and left down the page. We think this is pretty novel! Long notes fold
 behind a "more" toggle. Below a configurable breakpoint (1280px by default) the
 sidenotes are replaced by popovers anchored to the footnote marker, and the
 endnote list at the foot of the article reappears.
 
-Reading layout. Title, article options bar, and body are unified into one
+Reading layout: Title, article options bar, and body are unified into one
 centred surface with a configurable maximum width. Body text is set in
 Newsreader, a variable serif whose optical-size axis tracks font size.
 
-Citations. Renders each article's `custom_how_to_cite` field with the DOI as a
+Citations: Renders each article's `custom_how_to_cite` field with the DOI as a
 real link. The plugin styles this field; it does not generate citations, and it
 assumes whatever you put there is already in your preferred format.
 
-Latest Articles homepage element. An optional homepage block listing recent
-articles with abstract previews and author names, with a configurable count.
+Latest Articles homepage element: An optional homepage block listing recent
+articles with abstract previews and author names, with a configurable count. For some reason Janeway doesn't have one of these.
 
 Everything is driven off the class names and id patterns Janeway's default JATS
-XSLT already emits (`a.xref-fn`, `ol.footnotes`, `li#fn*`). No XSLT is forked.
+XSLT already emits (`a.xref-fn`, `ol.footnotes`, `li#fn*`). We don't change it.
 
-## Why it is low-risk to host
+## Why it is low-risk to host (how we and you can convince your OA press to install this)
 
 The plugin is one directory under `src/plugins/`. Janeway core is not patched,
 no theme is forked, no XSLT is forked, and no database migrations are run.
-Removing the directory reverts the install.
+Removing the directory reverts the install. Safety! Reversibility!
 
-It is off by default on every journal. All of its output — the stylesheet and
+It is off by default on every journal (so it doesn't bork your press). All of its output: the stylesheet and
 script injection, the homepage element, the JSON endpoint — passes through a
 single `is_enabled_for(journal)` gate that reads a per-journal setting. Until an
 editor turns that on for a specific journal, requests to every journal on the
-press get the stock `<head>` and stock templates, with nothing in the page
-referencing the plugin. Enabling it on one journal has no effect on any other.
+press get the stock `<head>` and stock templates, or whatever you have set, with nothing in the page
+referencing the plugin. **Enabling it on one journal has no effect on any other**.
 
 Its database footprint is what `install_plugins` creates for any Janeway
 plugin: one Plugin row, one SettingGroup, the Settings under it, and one
@@ -55,11 +55,13 @@ HomepageElement pointer per journal. Uninstalling is deleting those rows.
 Once installed, ongoing administrator involvement is close to zero. Colours,
 fonts, layout dimensions, the breakpoint, the backdrop logo, and free-form
 CSS and JavaScript overrides are all per-journal settings editable from the
-journal manager UI. Changes take effect on the next request — no restart, no
-asset rebuild, no deploy. An editor can patch a styling problem without filing
-a ticket against the host.
+journal manager UI. This means the journal admins can make some changes without having to update the plugin. Changes take effect on the next request — no restart, no
+asset rebuild, no deploy, no asking your admin to help you out. An editor can patch a styling problem without filing
+a ticket against the host, or without bothering them.
 
 ## Installing
+
+This *does* have to be done by an admin.
 
 Copy the `lawsnotes/` directory to `<janeway-source>/src/plugins/lawsnotes/`,
 then register it and restart:
@@ -136,7 +138,7 @@ needs those paths adjusted.
 
 Sidenotes need horizontal room. Below the breakpoint the layout degrades to
 popovers by design, so the margin apparatus is genuinely absent on phones
-rather than merely narrow.
+rather than merely narrow. It degrades gracefully, even beautifully.
 
 ## Layout
 
@@ -170,3 +172,5 @@ Normal journal styling resumes immediately.
 AGPL v3, matching Janeway. See [LICENSE](LICENSE). The bundled Newsreader
 fonts are licensed separately under the SIL Open Font License 1.1; see
 [lawsnotes/static/lawsnotes/fonts/README.md](lawsnotes/static/lawsnotes/fonts/README.md).
+
+If you use it, we would appreciate a credit to UCL Faculty of Laws.
