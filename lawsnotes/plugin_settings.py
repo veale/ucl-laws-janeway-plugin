@@ -2,18 +2,12 @@ __copyright__ = "Copyright 2026"
 __author__ = "UCL Laws"
 __license__ = "AGPL v3"
 
-from django.core.cache import cache
 from django.db.utils import OperationalError
 
 from utils import models
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-# How long per-journal settings are cached. Saves through the manage page
-# invalidate explicitly, so this only bounds staleness for changes made
-# out-of-band (shell, Django admin, fixtures).
-CUSTOMISATION_CACHE_TTL = 300
 
 PLUGIN_NAME = "lawsnotes"
 DISPLAY_NAME = "UCL Laws"
@@ -257,19 +251,44 @@ CUSTOMISATION_SECTIONS = [
 ]
 
 
-def customisation_cache_key(journal):
-    return "lawsnotes:cust:{0}".format(journal.pk)
+def _load_setting_values(journal, names=None):
+    """Return `{setting_name: SettingValue}` for this plugin's settings,
+    in one query, with the journal's own override preferred over the
+    installation default.
 
+    Janeway's get_plugin_setting() resolves a single setting at a time
+    and costs two queries each with no caching, so reading the ~30
+    customisation settings one by one put ~60 queries on every page
+    render of an enabled journal. SettingValue is unique on
+    (journal, setting), so a single filter over both the journal's rows
+    and the null-journal defaults gets everything at once.
 
-def invalidate_customisation(journal):
-    """Drop this journal's cached settings. Called by the manage view
-    after a save so edits are visible on the next request rather than
-    after the cache TTL."""
-    if journal:
-        cache.delete_many([
-            customisation_cache_key(journal),
-            enabled_cache_key(journal),
-        ])
+    Caching this instead would be wrong rather than merely slower:
+    Janeway's default cache backend is LocMemCache, which is per
+    process. An editor saving on the manage page would only clear the
+    cache of the worker that served the POST, leaving every other
+    worker serving stale settings until the entry expired, and a change
+    made from a shell or the Django admin would never invalidate
+    anything at all.
+    """
+    from django.db.models import Q
+    from core import models as core_models
+
+    qs = core_models.SettingValue.objects.filter(
+        setting__group__name=SETTING_GROUP_NAME,
+    ).filter(
+        Q(journal=journal) | Q(journal__isnull=True)
+    ).select_related("setting")
+    if names is not None:
+        qs = qs.filter(setting__name__in=list(names))
+
+    defaults, overrides = {}, {}
+    for sv in qs:
+        target = overrides if sv.journal_id else defaults
+        target[sv.setting.name] = sv
+    # A journal-specific row always wins over the installation default.
+    defaults.update(overrides)
+    return defaults
 
 
 def get_customisation(journal):
@@ -278,36 +297,21 @@ def get_customisation(journal):
     hook (to build the :root variables block + custom_css trailer)
     and by the manage view (to populate the form). Falls back to
     each setting's default when the per-journal value is empty so a
-    fresh install still renders correctly.
-
-    Cached per journal. head_css runs on every page of an enabled
-    journal, and Janeway's get_plugin_setting does two queries per
-    lookup with no caching of its own -- uncached this would put
-    ~60 queries on every single page render. The manage view calls
-    invalidate_customisation() on save, so the TTL only matters if a
-    SettingValue is changed out-of-band (shell, admin, fixture)."""
+    fresh install still renders correctly."""
     out = {}
     for spec in CUSTOMISATION_SETTINGS:
         out[spec["name"]] = spec["default"]
 
-    plugin = get_self()
-    if not (plugin and journal):
+    if not journal:
         return out
-
-    key = customisation_cache_key(journal)
-    cached = cache.get(key)
-    if cached is not None:
-        return cached
 
     try:
-        from utils.setting_handler import get_plugin_setting
+        values = _load_setting_values(journal)
     except Exception:
         return out
+
     for spec in CUSTOMISATION_SETTINGS:
-        try:
-            sv = get_plugin_setting(plugin, spec["name"], journal)
-        except Exception:
-            continue
+        sv = values.get(spec["name"])
         if sv is None:
             continue
         val = sv.processed_value
@@ -319,7 +323,6 @@ def get_customisation(journal):
             continue
         out[spec["name"]] = val
 
-    cache.set(key, out, CUSTOMISATION_CACHE_TTL)
     return out
 
 # Janeway's homepage view iterates HomepageElement rows for each journal
@@ -344,10 +347,6 @@ def get_self():
         return None
 
 
-def enabled_cache_key(journal):
-    return "lawsnotes:enabled:{0}".format(journal.pk)
-
-
 def is_enabled_for(journal):
     """Single source of truth for the per-journal kill switch.
 
@@ -358,29 +357,17 @@ def is_enabled_for(journal):
     in one place (the manager UI's per-journal Setting) silences
     every aspect of it for that journal.
 
-    Cached alongside the customisation dict, and for the same reason:
-    this runs on every request to every journal on the install,
-    including the ones where the answer is False.
+    One indexed query, and it runs on every request to every journal
+    on the install including the ones that answer False, so it stays
+    deliberately narrow: only the `enabled` row is fetched.
     """
     if not journal:
         return False
-
-    key = enabled_cache_key(journal)
-    cached = cache.get(key)
-    if cached is not None:
-        return cached
-
-    plugin = get_self()
-    if not plugin:
-        return False
     try:
-        from utils.setting_handler import get_plugin_setting
-        sv = get_plugin_setting(plugin, SETTING_NAME, journal)
+        sv = _load_setting_values(journal, names=[SETTING_NAME]).get(SETTING_NAME)
     except Exception:
         return False
-    value = bool(sv and sv.processed_value)
-    cache.set(key, value, CUSTOMISATION_CACHE_TTL)
-    return value
+    return bool(sv and sv.processed_value)
 
 
 def install():
@@ -520,11 +507,6 @@ def install():
             dirty = True
         if dirty:
             element.save()
-
-    # install() writes SettingValues directly, so drop any cached reads
-    # left over from before the run.
-    for j in journal_models.Journal.objects.all():
-        invalidate_customisation(j)
 
     logger.debug("UCL Laws plugin installed (created=%s).", created)
 

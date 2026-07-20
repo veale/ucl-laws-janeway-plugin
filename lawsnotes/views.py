@@ -206,10 +206,6 @@ def manage(request):
                 "Font #{0} uploaded to {1}.".format(n, url),
             )
 
-        # Settings are cached per journal; drop the entry so the next
-        # request renders with what was just saved.
-        plugin_settings.invalidate_customisation(journal)
-
         messages.success(request, "UCL Laws settings saved for {0}.".format(
             journal.code,
         ))
